@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  spotifytelegrambot:
+    image: ${DOCKER_REGISTRY-}spotifytelegrambot
+    build:
+      context: .
+      dockerfile: SpotifyTelegramBot/Dockerfile

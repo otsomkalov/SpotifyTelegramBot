@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28922.388
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotifyTelegramBot", "SpotifyTelegramBot\SpotifyTelegramBot.csproj", "{0F3277C1-A2B8-4ADA-82CE-A358D4185DB6}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{CA554547-7B06-4EDD-83F0-FBFBC56747F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0F3277C1-A2B8-4ADA-82CE-A358D4185DB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F3277C1-A2B8-4ADA-82CE-A358D4185DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F3277C1-A2B8-4ADA-82CE-A358D4185DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F3277C1-A2B8-4ADA-82CE-A358D4185DB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA554547-7B06-4EDD-83F0-FBFBC56747F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA554547-7B06-4EDD-83F0-FBFBC56747F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA554547-7B06-4EDD-83F0-FBFBC56747F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA554547-7B06-4EDD-83F0-FBFBC56747F7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {453CDDBC-B42B-4900-BA52-0EF7D06D920E}
+	EndGlobalSection
+EndGlobal

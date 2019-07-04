@@ -155,7 +155,7 @@ namespace SpotifyTelegramBot
             return new StringBuilder()
                 .AppendLine($"<a href=\"{track.ExternUrls["spotify"]}\">{track.Name}</a>")
                 .AppendLine($"Artists: {GetTrackArtistsLinks(track)}")
-                .AppendLine($"Album: {track.Album.Name}")
+                .AppendLine($"Album: <a href=\"{track.Album.ExternalUrls["spotify"]}\">{track.Album.Name}</a>")
                 .AppendLine($"Duration: {TimeSpan.FromMilliseconds(track.DurationMs):m\\:ss}")
                 .ToString();
         }

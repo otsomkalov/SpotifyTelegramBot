@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/core/runtime:latest AS base
+FROM mcr.microsoft.com/dotnet/core/runtime:3.0 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/core/sdk:latest AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /src
 COPY ["SpotifyTelegramBot/SpotifyTelegramBot.csproj", "SpotifyTelegramBot/"]
 RUN dotnet restore "SpotifyTelegramBot/SpotifyTelegramBot.csproj"

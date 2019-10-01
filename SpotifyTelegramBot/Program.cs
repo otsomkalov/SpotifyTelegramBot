@@ -1,11 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SpotifyAPI.Web;
+﻿using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 using SpotifyAPI.Web.Enums;
 using SpotifyAPI.Web.Models;
+using System;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
@@ -120,7 +120,7 @@ namespace SpotifyTelegramBot
                 })
             {
                 ThumbUrl = album.Images.FirstOrDefault()?.Url,
-                Description = $"{string.Join(" ,", album.Artists.Select(artist => artist.Name))} \nAlbum"
+                Description = $"{string.Join(", ", album.Artists.Select(artist => artist.Name))} \nAlbum"
             };
         }
 
@@ -187,14 +187,14 @@ namespace SpotifyTelegramBot
 
         private static string GetTrackArtistsLinks(FullTrack track)
         {
-            return string.Join(" ,",
+            return string.Join(", ",
                 track.Artists
                     .Select(artist => $"<a href=\"{artist.ExternalUrls["spotify"]}\">{artist.Name}</a>"));
         }
 
         private static string GetAlbumArtistsLinks(SimpleAlbum album)
         {
-            return string.Join(" ,",
+            return string.Join(", ",
                 album.Artists
                     .Select(artist => $"<a href=\"{artist.ExternalUrls["spotify"]}\">{artist.Name}</a>"));
         }

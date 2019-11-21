@@ -6,3 +6,5 @@ services:
     build:
       context: .
       dockerfile: SpotifyTelegramBot/Dockerfile
+    volumes:
+      - /var/log:/app/log/bots

@@ -5,7 +5,7 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
 ## Getting Started
 ### Prerequisites
 
-- [.NET Core 2.2](https://dotnet.microsoft.com/download) or higher
+- [.NET Core 3.0](https://dotnet.microsoft.com/download) or higher
 
 ### Installing
 
@@ -23,8 +23,7 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
 1. Clone project
 2. Run in folder
 ```
-docker-compose build
-docker run -d spotifytelegrambot <telegram_bot_token> <spotify_app_id> <spotify_app_client_secret>
+docker-compose run -d spotifytelegrambot <telegram_bot_token> <spotify_app_id> <spotify_app_client_secret>
 ```
 or go to **SpotifyTelegramBot** folder and run:
 ```

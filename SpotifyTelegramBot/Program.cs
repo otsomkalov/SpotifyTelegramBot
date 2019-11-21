@@ -44,7 +44,7 @@ namespace SpotifyTelegramBot
 
             await GetAccessTokenAsync();
 
-            Console.WriteLine("Bot started");
+            _logger.Information("Bot started");
 
             await Task.Delay(-1);
         }

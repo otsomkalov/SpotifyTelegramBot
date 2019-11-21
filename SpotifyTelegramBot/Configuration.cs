@@ -4,7 +4,7 @@ using Telegram.Bot.Types;
 
 namespace SpotifyTelegramBot
 {
-    public class Configuration
+    public static class Configuration
     {
         public static Logger ConfigureLogger()
         {

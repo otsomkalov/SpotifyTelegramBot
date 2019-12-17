@@ -5,7 +5,7 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
 ## Getting Started
 ### Prerequisites
 
-- [.NET Core 3.0](https://dotnet.microsoft.com/download) or higher
+- [.NET Core 3.1](https://dotnet.microsoft.com/download) or higher
 
 ### Installing
 
@@ -21,15 +21,7 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
 
 **Project:**
 1. Clone project
-2. Run in folder
-```
-docker-compose run -d spotifytelegrambot <telegram_bot_token> <spotify_app_id> <spotify_app_client_secret>
-```
-or go to **SpotifyTelegramBot** folder and run:
-```
-dotnet run <telegram_bot_token> <spotify_app_id> <spotify_app_client_secret>
-```
-
+2. [Publish](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#publish) to Azure Functions or run [locally](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-local)
 
 ## Usage
 
@@ -40,6 +32,7 @@ You can try this bot in [Telegram](https://t.me/ExploreSpotifyBot)
 
 * [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot) - .NET Client for Telegram Bot API
 * [SpotifyAPI-NET](https://github.com/JohnnyCrazy/SpotifyAPI-NET) - An API for the Spotify-Client and the Spotify Web API, written in C#/.NET
+* [Azure Functions](https://azure.microsoft.com/en-us/services/functions/) - More than just event-driven serverless compute
 
 
 ## Contributing

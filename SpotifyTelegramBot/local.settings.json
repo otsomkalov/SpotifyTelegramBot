@@ -1,0 +1,10 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "Token": "<telegram bot token>",
+    "Spotify:ClientId": "<spotify app client id>",
+    "Spotify:ClientSecret": "<spotify app client secret>"
+  }
+}

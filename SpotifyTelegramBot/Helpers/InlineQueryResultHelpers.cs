@@ -7,19 +7,6 @@ namespace SpotifyTelegramBot.Helpers
 {
     public static class InlineQueryResultHelpers
     {
-        public static InlineQueryResultArticle GetTrackInlineQueryResult(FullTrack track)
-        {
-            return new InlineQueryResultArticle(track.Id, track.Name,
-                new InputTextMessageContent(MarkdownHelpers.GetTrackMarkdown(track))
-                {
-                    ParseMode = ParseMode.Html
-                })
-            {
-                ThumbUrl = track.Album.Images.FirstOrDefault()?.Url,
-                Description = $"{string.Join(" ,", track.Artists.Select(artist => artist.Name))}\nTrack"
-            };
-        }
-
         public static InlineQueryResultArticle GetAlbumInlineQueryResult(SimpleAlbum album)
         {
             return new InlineQueryResultArticle(album.Id, album.Name,
@@ -56,6 +43,19 @@ namespace SpotifyTelegramBot.Helpers
             {
                 ThumbUrl = playlist.Images.FirstOrDefault()?.Url,
                 Description = $"Owner: {playlist.Owner.DisplayName} \nPlaylist"
+            };
+        }
+
+        public static InlineQueryResultArticle GetTrackInlineQueryResult(FullTrack track)
+        {
+            return new InlineQueryResultArticle(track.Id, track.Name,
+                new InputTextMessageContent(MarkdownHelpers.GetTrackMarkdown(track))
+                {
+                    ParseMode = ParseMode.Html
+                })
+            {
+                ThumbUrl = track.Album.Images.FirstOrDefault()?.Url,
+                Description = $"{string.Join(" ,", track.Artists.Select(artist => artist.Name))}\nTrack"
             };
         }
     }

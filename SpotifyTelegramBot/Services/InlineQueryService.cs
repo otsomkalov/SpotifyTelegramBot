@@ -25,34 +25,29 @@ namespace SpotifyTelegramBot.Services
 
         public async Task HandleAsync(InlineQuery inlineQuery)
         {
-            if (string.IsNullOrEmpty(inlineQuery.Query)) return;
+            if (string.IsNullOrEmpty(inlineQuery.Query))
+            {
+                return;
+            }
 
-            _spotifyApi.AccessToken = $"Bearer {await _spotifyAuthService.GetAccessTokenAsync()}";
+            _spotifyApi.AccessToken ??= $"Bearer {await _spotifyAuthService.GetAccessTokenAsync()}";
 
             var response = await _spotifyApi.SearchItemsAsync(inlineQuery.Query, SearchType.All, 5);
 
-            var tracksInlineQueryResults =
-                response.Tracks.Items.Select(InlineQueryResultHelpers.GetTrackInlineQueryResult);
+            var tracks = response.Tracks.Items.Select(InlineQueryResultHelpers.GetTrackInlineQueryResult);
+            var albums = response.Albums.Items.Select(InlineQueryResultHelpers.GetAlbumInlineQueryResult);
+            var artists = response.Artists.Items.Select(InlineQueryResultHelpers.GetArtistInlineQueryResult);
+            var playlists = response.Playlists.Items.Select(InlineQueryResultHelpers.GetPlaylistInlineQueryResult);
 
-            var albumsInlineQueryResults =
-                response.Albums.Items.Select(InlineQueryResultHelpers.GetAlbumInlineQueryResult);
+            var results = new[]
+            {
+                tracks,
+                albums,
+                artists,
+                playlists
+            }.SelectMany(markdowns => markdowns);
 
-            var artistsInlineQueryResults =
-                response.Artists.Items.Select(InlineQueryResultHelpers.GetArtistInlineQueryResult);
-
-            var playlistsInlineQueryResults =
-                response.Playlists.Items.Select(InlineQueryResultHelpers.GetPlaylistInlineQueryResult);
-
-            var inlineQueriesResults = new[]
-                {
-                    tracksInlineQueryResults,
-                    albumsInlineQueryResults,
-                    artistsInlineQueryResults,
-                    playlistsInlineQueryResults
-                }
-                .SelectMany(markdowns => markdowns);
-
-            await _bot.AnswerInlineQueryAsync(inlineQuery.Id, inlineQueriesResults);
+            await _bot.AnswerInlineQueryAsync(inlineQuery.Id, results);
         }
     }
 }

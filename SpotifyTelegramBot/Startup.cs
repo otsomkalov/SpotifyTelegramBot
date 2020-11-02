@@ -7,7 +7,6 @@ using SpotifyTelegramBot;
 using SpotifyTelegramBot.Services;
 using SpotifyTelegramBot.Services.Interfaces;
 using SpotifyTelegramBot.Settings;
-using SpotifyTelegramBot.Settings.Interfaces;
 using Telegram.Bot;
 
 [assembly: WebJobsStartup(typeof(Startup))]
@@ -22,17 +21,13 @@ namespace SpotifyTelegramBot
                 .AddEnvironmentVariables()
                 .Build();
 
-            ISpotifySettings spotifySettings = new SpotifySettings();
-
-            config.Bind("Spotify", spotifySettings);
-
-            ITelegramBotClient bot = new TelegramBotClient(config["Token"]);
+            var settings = config.Get<AppSettings>();
 
             builder.Services
-                .AddSingleton(bot)
+                .AddSingleton(settings.Spotify)
+                .AddSingleton<ITelegramBotClient>(provider => new TelegramBotClient(settings.Token))
                 .AddSingleton<ISpotifyAuthService, SpotifyAuthService>()
                 .AddSingleton(provider => new SpotifyWebAPI())
-                .AddSingleton(spotifySettings)
                 .AddScoped<IMessageService, MessageService>()
                 .AddScoped<IInlineQueryService, InlineQueryService>();
         }

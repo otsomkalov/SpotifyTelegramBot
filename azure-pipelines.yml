@@ -16,9 +16,6 @@ variables:
   # Agent VM image name
   vmImageName: 'vs2017-win2016'
 
-  # Working Directory
-  workingDirectory: '/'
-
 stages:
 - stage: Build
   displayName: Build stage
@@ -34,8 +31,7 @@ stages:
       displayName: Build
       inputs:
         command: 'build'
-        projects: |
-          $(workingDirectory)/*.csproj
+        projects: '**/*.csproj'
         arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
 
     - task: ArchiveFiles@2

@@ -1,40 +1,55 @@
-﻿using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SpotifyAPI.Web;
-using SpotifyTelegramBot;
 using SpotifyTelegramBot.Services;
 using SpotifyTelegramBot.Services.Interfaces;
 using SpotifyTelegramBot.Settings;
-using SpotifyTelegramBot.Settings.Interfaces;
 using Telegram.Bot;
-
-[assembly: WebJobsStartup(typeof(Startup))]
 
 namespace SpotifyTelegramBot
 {
-    internal class Startup : IWebJobsStartup
+    public class Startup
     {
-        public void Configure(IWebJobsBuilder builder)
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
         {
-            var config = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .Build();
+            _configuration = configuration;
+        }
 
-            ISpotifySettings spotifySettings = new SpotifySettings();
+        public void ConfigureServices(IServiceCollection services)
+        {
+            var appSettings = _configuration.Get<AppSettings>();
 
-            config.Bind("Spotify", spotifySettings);
+            ITelegramBotClient bot = new TelegramBotClient(appSettings.Token);
 
-            ITelegramBotClient bot = new TelegramBotClient(config["Token"]);
-
-            builder.Services
-                .AddSingleton(bot)
+            services.AddSingleton(bot)
                 .AddSingleton<ISpotifyAuthService, SpotifyAuthService>()
                 .AddSingleton(provider => new SpotifyWebAPI())
-                .AddSingleton(spotifySettings)
+                .AddSingleton(appSettings)
                 .AddScoped<IMessageService, MessageService>()
                 .AddScoped<IInlineQueryService, InlineQueryService>();
+
+            services.AddControllers().AddNewtonsoftJson();
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

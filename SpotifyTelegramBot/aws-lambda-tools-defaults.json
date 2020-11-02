@@ -1,0 +1,7 @@
+{
+  "region": "eu-central-1",
+  "profile": "default",
+  "s3-bucket": "spotify-bot",
+  "template": "serverless.template",
+  "stack-name": "SpotifyBot"
+}

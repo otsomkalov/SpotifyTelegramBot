@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using SpotifyAPI.Web.Auth;
 using SpotifyAPI.Web.Models;
 using SpotifyTelegramBot.Services.Interfaces;
-using SpotifyTelegramBot.Settings.Interfaces;
+using SpotifyTelegramBot.Settings;
 
 namespace SpotifyTelegramBot.Services
 {
@@ -11,15 +11,17 @@ namespace SpotifyTelegramBot.Services
         private readonly CredentialsAuth _authData;
         private Token _token;
 
-        public SpotifyAuthService(ISpotifySettings spotifySettings)
+        public SpotifyAuthService(AppSettings appSettings)
         {
-            _authData = new CredentialsAuth(spotifySettings.ClientId, spotifySettings.ClientSecret);
+            _authData = new CredentialsAuth(appSettings.Spotify.ClientId, appSettings.Spotify.ClientSecret);
         }
 
         public async Task<string> GetAccessTokenAsync()
         {
             if (_token == null || _token.IsExpired())
+            {
                 _token = await _authData.GetToken();
+            }
 
             return _token.AccessToken;
         }

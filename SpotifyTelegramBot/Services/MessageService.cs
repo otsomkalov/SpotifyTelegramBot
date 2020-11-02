@@ -18,10 +18,12 @@ namespace SpotifyTelegramBot.Services
         public async Task HandleAsync(Message message)
         {
             if (message.Text.StartsWith("/start"))
+            {
                 await _bot.SendTextMessageAsync(new ChatId(message.From.Id),
                     "This bot allows you search & share songs, albums and artists from Spotify. It works on every " +
-                    "dialog, just type @ExploreSpotifyBot in message input",
+                    "dialog, just type @sptfyqbot in message input",
                     replyMarkup: InlineKeyboardMarkupHelpers.GetStartKeyboardMarkup());
+            }
         }
     }
 }

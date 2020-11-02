@@ -1,8 +1,6 @@
-using SpotifyTelegramBot.Settings.Interfaces;
-
 namespace SpotifyTelegramBot.Settings
 {
-    public class SpotifySettings : ISpotifySettings
+    public class SpotifySettings
     {
         public string ClientId { get; set; }
 

@@ -8,10 +8,8 @@ namespace SpotifyTelegramBot.Helpers
         {
             return new InlineKeyboardMarkup(new[]
             {
-                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(
-                    "🔍 Search songs, albums, artists and playlists"),
-                InlineKeyboardButton.WithSwitchInlineQuery(
-                    "🔗 Find and share songs, albums, artists and playlists")
+                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("🔍 Search songs, albums, artists and playlists"),
+                InlineKeyboardButton.WithSwitchInlineQuery("🔗 Find and share songs, albums, artists and playlists")
             });
         }
     }

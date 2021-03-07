@@ -1,13 +1,13 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Bot.Helpers;
+using Bot.Services.Interfaces;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Enums;
-using SpotifyTelegramBot.Helpers;
-using SpotifyTelegramBot.Services.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace SpotifyTelegramBot.Services
+namespace Bot.Services
 {
     public class InlineQueryService : IInlineQueryService
     {

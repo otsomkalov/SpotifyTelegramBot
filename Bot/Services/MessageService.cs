@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
-using SpotifyTelegramBot.Helpers;
-using SpotifyTelegramBot.Services.Interfaces;
+using Bot.Helpers;
+using Bot.Services.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace SpotifyTelegramBot.Services
+namespace Bot.Services
 {
     public class MessageService : IMessageService
     {

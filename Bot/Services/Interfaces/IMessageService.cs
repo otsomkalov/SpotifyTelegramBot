@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 
-namespace SpotifyTelegramBot.Services.Interfaces
+namespace Bot.Services.Interfaces
 {
     public interface IMessageService
     {

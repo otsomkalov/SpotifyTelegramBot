@@ -1,37 +1,28 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Bot.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using SpotifyTelegramBot.Services.Interfaces;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace SpotifyTelegramBot
+namespace Bot.Controllers
 {
-    public class UpdateFunctions
+    [ApiController]
+    [Route("/update")]
+    public class UpdateController : ControllerBase
     {
         private readonly IInlineQueryService _inlineQueryService;
         private readonly IMessageService _messageService;
 
-        public UpdateFunctions(IMessageService messageService, IInlineQueryService inlineQueryService)
+        public UpdateController(IMessageService messageService, IInlineQueryService inlineQueryService)
         {
             _messageService = messageService;
             _inlineQueryService = inlineQueryService;
         }
 
-        [FunctionName(nameof(ProcessUpdateAsync))]
-        public async Task<IActionResult> ProcessUpdateAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "POST", Route = "update")]
-            string updateString,
-            HttpRequest request,
-            ILogger logger)
+        [HttpPost]
+        public async Task<IActionResult> ProcessUpdateAsync(Update update)
         {
-            var update = JsonConvert.DeserializeObject<Update>(updateString);
-
             switch (update.Type)
             {
                 case UpdateType.Unknown:

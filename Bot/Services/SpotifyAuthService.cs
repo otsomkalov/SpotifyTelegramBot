@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
+using Bot.Services.Interfaces;
+using Bot.Settings;
 using SpotifyAPI.Web.Auth;
 using SpotifyAPI.Web.Models;
-using SpotifyTelegramBot.Services.Interfaces;
-using SpotifyTelegramBot.Settings;
 
-namespace SpotifyTelegramBot.Services
+namespace Bot.Services
 {
     public class SpotifyAuthService : ISpotifyAuthService
     {

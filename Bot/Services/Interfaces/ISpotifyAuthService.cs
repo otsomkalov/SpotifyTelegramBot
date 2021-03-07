@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace SpotifyTelegramBot.Services.Interfaces
+namespace Bot.Services.Interfaces
 {
     public interface ISpotifyAuthService
     {

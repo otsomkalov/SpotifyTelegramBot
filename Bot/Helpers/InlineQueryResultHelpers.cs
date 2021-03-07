@@ -3,7 +3,7 @@ using SpotifyAPI.Web.Models;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 
-namespace SpotifyTelegramBot.Helpers
+namespace Bot.Helpers
 {
     public static class InlineQueryResultHelpers
     {

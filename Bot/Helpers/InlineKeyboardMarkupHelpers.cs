@@ -1,6 +1,6 @@
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace SpotifyTelegramBot.Helpers
+namespace Bot.Helpers
 {
     public static class InlineKeyboardMarkupHelpers
     {

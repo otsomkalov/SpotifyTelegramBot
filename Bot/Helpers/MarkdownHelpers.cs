@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using SpotifyAPI.Web.Models;
 
-namespace SpotifyTelegramBot.Helpers
+namespace Bot.Helpers
 {
     public static class MarkdownHelpers
     {

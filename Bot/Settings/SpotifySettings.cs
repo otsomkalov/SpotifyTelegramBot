@@ -1,4 +1,4 @@
-namespace SpotifyTelegramBot.Settings
+namespace Bot.Settings
 {
     public class SpotifySettings
     {

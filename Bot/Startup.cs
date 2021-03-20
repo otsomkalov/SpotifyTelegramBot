@@ -37,6 +37,8 @@ namespace Bot
                 .AddSingleton(_ => new SpotifyWebAPI())
                 .AddScoped<IMessageService, MessageService>()
                 .AddScoped<IInlineQueryService, InlineQueryService>();
+
+            services.AddApplicationInsightsTelemetry();
             
             services.AddControllers().AddNewtonsoftJson();
         }

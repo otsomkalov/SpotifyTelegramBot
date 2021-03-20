@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using SpotifyAPI.Web;
 using Telegram.Bot;
 
@@ -23,11 +24,15 @@ namespace Bot
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var settings = _configuration.Get<AppSettings>();
-
             services
-                .AddSingleton(settings.Spotify)
-                .AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(settings.Token))
+                .Configure<TelegramSettings>(_configuration.GetSection(TelegramSettings.SectionName))
+                .Configure<SpotifySettings>(_configuration.GetSection(SpotifySettings.SectionName))
+                .AddSingleton<ITelegramBotClient>(provider =>
+                {
+                    var telegramSettings = provider.GetService<IOptions<TelegramSettings>>().Value;
+
+                    return new TelegramBotClient(telegramSettings.Token);
+                })
                 .AddSingleton<ISpotifyAuthService, SpotifyAuthService>()
                 .AddSingleton(_ => new SpotifyWebAPI())
                 .AddScoped<IMessageService, MessageService>()

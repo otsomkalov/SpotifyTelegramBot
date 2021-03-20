@@ -1,6 +1,8 @@
+using System;
 using System.Threading.Tasks;
 using Bot.Services.Interfaces;
 using Bot.Settings;
+using Microsoft.Extensions.Options;
 using SpotifyAPI.Web.Auth;
 using SpotifyAPI.Web.Models;
 
@@ -11,9 +13,11 @@ namespace Bot.Services
         private readonly CredentialsAuth _authData;
         private Token _token;
 
-        public SpotifyAuthService(SpotifySettings spotifySettings)
+        public SpotifyAuthService(IOptions<SpotifySettings> spotifySettings)
         {
-            _authData = new CredentialsAuth(spotifySettings.ClientId, spotifySettings.ClientSecret);
+            var settings = spotifySettings?.Value ?? throw new ArgumentNullException(nameof(spotifySettings));
+            
+            _authData = new CredentialsAuth(settings.ClientId, settings.ClientSecret);
         }
 
         public async Task<string> GetAccessTokenAsync()

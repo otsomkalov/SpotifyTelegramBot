@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Bot.Helpers;
@@ -18,9 +19,9 @@ namespace Bot.Services
         public InlineQueryService(ITelegramBotClient bot, SpotifyWebAPI spotifyApi,
             ISpotifyAuthService spotifyAuthService)
         {
-            _bot = bot;
-            _spotifyApi = spotifyApi;
-            _spotifyAuthService = spotifyAuthService;
+            _bot = bot ?? throw new ArgumentNullException(nameof(bot));
+            _spotifyApi = spotifyApi ?? throw new ArgumentNullException(nameof(spotifyApi));
+            _spotifyAuthService = spotifyAuthService ?? throw new ArgumentNullException(nameof(spotifyAuthService));
         }
 
         public async Task HandleAsync(InlineQuery inlineQuery)

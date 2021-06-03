@@ -1,0 +1,26 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+
+- repo: self
+
+stages:
+- stage: Deploy
+  displayName: Deploy app
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: SSH@0
+      inputs:
+        sshEndpoint: 'server'
+        runOptions: 'script'
+        scriptPath: '/root/UpSpotifyBot'
+        readyTimeout: '20000'

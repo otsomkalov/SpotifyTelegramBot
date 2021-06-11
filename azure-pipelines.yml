@@ -1,4 +1,3 @@
-name : Docker-CI
 trigger:
   branches:
     include:
@@ -15,7 +14,7 @@ stages:
   displayName: Build image
   jobs:  
   - job: Build
-    displayName: Build and push Docker image
+    displayName: Build Docker image
     steps:
     - task: Docker@1
       displayName: 'Build the Docker image'
@@ -28,7 +27,9 @@ stages:
         includeLatestTag: true
         useDefaultContext: false
         buildContext: '.'
-     
+  - job: Push
+    displayName: 'Push the Docker image to Dockerhub'
+    steps:
     - task: Docker@1
       displayName: 'Push the Docker image to Dockerhub'
       inputs:
@@ -36,4 +37,3 @@ stages:
         dockerRegistryEndpoint: 'DockerHub'
         command: 'Push an image'
         imageName: '$(ImageName)'
-      condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))

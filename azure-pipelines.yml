@@ -27,9 +27,6 @@ stages:
         includeLatestTag: true
         useDefaultContext: false
         buildContext: '.'
-  - job: Push
-    displayName: 'Push the Docker image to Dockerhub'
-    steps:
     - task: Docker@1
       displayName: 'Push the Docker image to Dockerhub'
       inputs:

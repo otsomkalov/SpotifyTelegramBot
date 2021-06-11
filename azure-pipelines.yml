@@ -8,7 +8,7 @@ pool:
   vmImage: 'ubuntu-latest'
  
 variables:
-  ImageName: 'infinitu1327/spotifybot:$(Build.BuildId)'
+  ImageName: 'infinitu1327/spotifybot'
  
 stages:
 - stage: Build

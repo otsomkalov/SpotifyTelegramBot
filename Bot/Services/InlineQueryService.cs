@@ -29,7 +29,7 @@ namespace Bot.Services
 
             var response = await _spotifyClient.Search.Item(new(SearchRequest.Types.All, inlineQuery.Query)
             {
-                Limit = 12
+                Limit = 4
             });
 
             var tracks = response.Tracks.Items.Select(InlineQueryResultHelpers.GetTrackInlineQueryResult);
@@ -38,12 +38,11 @@ namespace Bot.Services
             var playlists = response.Playlists.Items.Select(InlineQueryResultHelpers.GetPlaylistInlineQueryResult);
 
             var results = new[]
-            {
-                tracks,
-                albums,
-                artists,
-                playlists
-            }.SelectMany(markdowns => markdowns);
+                {
+                    tracks, albums, artists, playlists
+                }
+                .SelectMany(markdowns => markdowns)
+                .Where(article => !string.IsNullOrEmpty(article.Title));
 
             await _bot.AnswerInlineQueryAsync(inlineQuery.Id, results);
         }

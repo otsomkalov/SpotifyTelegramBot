@@ -29,9 +29,9 @@ namespace Bot
                 .Configure<SpotifySettings>(_configuration.GetSection(SpotifySettings.SectionName))
                 .AddSingleton<ITelegramBotClient>(provider =>
                 {
-                    var telegramSettings = provider.GetRequiredService<IOptions<TelegramSettings>>().Value;
+                    var settings = provider.GetRequiredService<IOptions<TelegramSettings>>().Value;
 
-                    return new TelegramBotClient(telegramSettings.Token);
+                    return new TelegramBotClient(settings.Token, baseUrl: settings.ApiUrl);
                 })
                 .AddSingleton<ISpotifyClient>(provider =>
                 {

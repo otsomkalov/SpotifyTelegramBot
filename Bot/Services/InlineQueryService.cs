@@ -29,7 +29,7 @@ namespace Bot.Services
 
             var response = await _spotifyClient.Search.Item(new(SearchRequest.Types.All, inlineQuery.Query)
             {
-                Limit = 50
+                Limit = 12
             });
 
             var tracks = response.Tracks.Items.Select(InlineQueryResultHelpers.GetTrackInlineQueryResult);

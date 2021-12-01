@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Bot.Helpers;
 using Bot.Services.Interfaces;
 using SpotifyAPI.Web;
-using SpotifyAPI.Web.Enums;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -13,15 +12,12 @@ namespace Bot.Services
     public class InlineQueryService : IInlineQueryService
     {
         private readonly ITelegramBotClient _bot;
-        private readonly SpotifyWebAPI _spotifyApi;
-        private readonly ISpotifyAuthService _spotifyAuthService;
+        private readonly ISpotifyClient _spotifyClient;
 
-        public InlineQueryService(ITelegramBotClient bot, SpotifyWebAPI spotifyApi,
-            ISpotifyAuthService spotifyAuthService)
+        public InlineQueryService(ITelegramBotClient bot, ISpotifyClient spotifyClient)
         {
             _bot = bot ?? throw new ArgumentNullException(nameof(bot));
-            _spotifyApi = spotifyApi ?? throw new ArgumentNullException(nameof(spotifyApi));
-            _spotifyAuthService = spotifyAuthService ?? throw new ArgumentNullException(nameof(spotifyAuthService));
+            _spotifyClient = spotifyClient ?? throw new ArgumentNullException(nameof(spotifyClient));
         }
 
         public async Task HandleAsync(InlineQuery inlineQuery)
@@ -31,9 +27,10 @@ namespace Bot.Services
                 return;
             }
 
-            _spotifyApi.AccessToken ??= $"Bearer {await _spotifyAuthService.GetAccessTokenAsync()}";
-
-            var response = await _spotifyApi.SearchItemsAsync(inlineQuery.Query, SearchType.All, 5);
+            var response = await _spotifyClient.Search.Item(new(SearchRequest.Types.All, inlineQuery.Query)
+            {
+                Limit = 4
+            });
 
             var tracks = response.Tracks.Items.Select(InlineQueryResultHelpers.GetTrackInlineQueryResult);
             var albums = response.Albums.Items.Select(InlineQueryResultHelpers.GetAlbumInlineQueryResult);
@@ -41,12 +38,11 @@ namespace Bot.Services
             var playlists = response.Playlists.Items.Select(InlineQueryResultHelpers.GetPlaylistInlineQueryResult);
 
             var results = new[]
-            {
-                tracks,
-                albums,
-                artists,
-                playlists
-            }.SelectMany(markdowns => markdowns);
+                {
+                    tracks, albums, artists, playlists
+                }
+                .SelectMany(markdowns => markdowns)
+                .Where(article => !string.IsNullOrEmpty(article.Title));
 
             await _bot.AnswerInlineQueryAsync(inlineQuery.Id, results);
         }

@@ -1,10 +1,6 @@
-using System.Threading.Tasks;
-using Telegram.Bot.Types;
+namespace Bot.Services.Interfaces;
 
-namespace Bot.Services.Interfaces
+public interface IMessageService
 {
-    public interface IMessageService
-    {
-        Task HandleAsync(Message message);
-    }
+    Task HandleAsync(Message message);
 }

@@ -1,16 +1,15 @@
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Bot.Helpers
+namespace Bot.Helpers;
+
+public static class InlineKeyboardMarkupHelpers
 {
-    public static class InlineKeyboardMarkupHelpers
+    public static InlineKeyboardMarkup GetStartKeyboardMarkup()
     {
-        public static InlineKeyboardMarkup GetStartKeyboardMarkup()
+        return new(new[]
         {
-            return new InlineKeyboardMarkup(new[]
-            {
-                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("🔍 Search songs, albums, artists and playlists"),
-                InlineKeyboardButton.WithSwitchInlineQuery("🔗 Find and share songs, albums, artists and playlists")
-            });
-        }
+            InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("🔍 Search songs, albums, artists and playlists"),
+            InlineKeyboardButton.WithSwitchInlineQuery("🔗 Find and share songs, albums, artists and playlists")
+        });
     }
 }

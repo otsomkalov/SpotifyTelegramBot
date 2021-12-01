@@ -1,10 +1,6 @@
-using System.Threading.Tasks;
-using Telegram.Bot.Types;
+namespace Bot.Services.Interfaces;
 
-namespace Bot.Services.Interfaces
+public interface IInlineQueryService
 {
-    public interface IInlineQueryService
-    {
-        Task HandleAsync(InlineQuery inlineQuery);
-    }
+    Task HandleAsync(InlineQuery inlineQuery);
 }

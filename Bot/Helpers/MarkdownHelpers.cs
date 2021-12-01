@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using SpotifyAPI.Web.Models;
+using SpotifyAPI.Web;
 
 namespace Bot.Helpers
 {
@@ -34,7 +34,7 @@ namespace Bot.Helpers
         public static string GetTrackMarkdown(FullTrack track)
         {
             return new StringBuilder()
-                .AppendLine($"<a href=\"{track.ExternUrls["spotify"]}\">{track.Name}</a>")
+                .AppendLine($"<a href=\"{track.ExternalUrls["spotify"]}\">{track.Name}</a>")
                 .AppendLine($"Artists: {DataHelpers.GetTrackArtistsLinks(track)}")
                 .AppendLine($"Album: <a href=\"{track.Album.ExternalUrls["spotify"]}\">{track.Album.Name}</a>")
                 .AppendLine($"Duration: {TimeSpan.FromMilliseconds(track.DurationMs):m\\:ss}")

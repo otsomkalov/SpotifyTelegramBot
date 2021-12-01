@@ -1,5 +1,5 @@
 using System.Linq;
-using SpotifyAPI.Web.Models;
+using SpotifyAPI.Web;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 

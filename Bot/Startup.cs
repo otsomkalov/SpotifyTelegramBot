@@ -29,12 +29,20 @@ namespace Bot
                 .Configure<SpotifySettings>(_configuration.GetSection(SpotifySettings.SectionName))
                 .AddSingleton<ITelegramBotClient>(provider =>
                 {
-                    var telegramSettings = provider.GetService<IOptions<TelegramSettings>>().Value;
+                    var telegramSettings = provider.GetRequiredService<IOptions<TelegramSettings>>().Value;
 
                     return new TelegramBotClient(telegramSettings.Token);
                 })
-                .AddSingleton<ISpotifyAuthService, SpotifyAuthService>()
-                .AddSingleton(_ => new SpotifyWebAPI())
+                .AddSingleton<ISpotifyClient>(provider =>
+                {
+                    var settings = provider.GetRequiredService<IOptions<SpotifySettings>>().Value;
+
+                    var config = SpotifyClientConfig
+                        .CreateDefault()
+                        .WithAuthenticator(new ClientCredentialsAuthenticator(settings.ClientId, settings.ClientSecret));
+
+                    return new SpotifyClient(config);
+                })
                 .AddScoped<IMessageService, MessageService>()
                 .AddScoped<IInlineQueryService, InlineQueryService>();
 

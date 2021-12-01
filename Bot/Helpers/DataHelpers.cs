@@ -1,5 +1,5 @@
 using System.Linq;
-using SpotifyAPI.Web.Models;
+using SpotifyAPI.Web;
 
 namespace Bot.Helpers
 {

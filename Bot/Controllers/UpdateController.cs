@@ -10,59 +10,32 @@ public class UpdateController : ControllerBase
 {
     private readonly IInlineQueryService _inlineQueryService;
     private readonly IMessageService _messageService;
+    private readonly ILogger<UpdateController> _logger;
 
-    public UpdateController(IMessageService messageService, IInlineQueryService inlineQueryService)
+    public UpdateController(IMessageService messageService, IInlineQueryService inlineQueryService, ILogger<UpdateController> logger)
     {
         _messageService = messageService;
         _inlineQueryService = inlineQueryService;
+        _logger = logger;
     }
 
     [HttpPost]
-    public async Task<IActionResult> ProcessUpdateAsync(Update update)
+    public async Task ProcessUpdateAsync(Update update)
     {
-        switch (update.Type)
+        var processUpdateTask = update.Type switch
         {
-            case UpdateType.Unknown:
-                break;
+            UpdateType.Message => _messageService.HandleAsync(update.Message),
+            UpdateType.InlineQuery => _inlineQueryService.HandleAsync(update.InlineQuery),
+            _ => Task.CompletedTask
+        };
 
-            case UpdateType.Message:
-                await _messageService.HandleAsync(update.Message);
-
-                break;
-
-            case UpdateType.InlineQuery:
-                await _inlineQueryService.HandleAsync(update.InlineQuery);
-
-                break;
-
-            case UpdateType.ChosenInlineResult:
-                break;
-
-            case UpdateType.CallbackQuery:
-                break;
-
-            case UpdateType.EditedMessage:
-                break;
-
-            case UpdateType.ChannelPost:
-                break;
-
-            case UpdateType.EditedChannelPost:
-                break;
-
-            case UpdateType.ShippingQuery:
-                break;
-
-            case UpdateType.PreCheckoutQuery:
-                break;
-
-            case UpdateType.Poll:
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException();
+        try
+        {
+            await processUpdateTask;
         }
-
-        return new OkResult();
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error during processing update:");
+        }
     }
 }

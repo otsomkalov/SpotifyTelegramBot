@@ -23,8 +23,9 @@ public class Startup
             .AddSingleton<ITelegramBotClient>(provider =>
             {
                 var settings = provider.GetRequiredService<IOptions<TelegramSettings>>().Value;
+                var baseUrl = string.IsNullOrEmpty(settings.ApiUrl) ? null : settings.ApiUrl;
 
-                return new TelegramBotClient(settings.Token, baseUrl: settings.ApiUrl);
+                return new TelegramBotClient(settings.Token, baseUrl: baseUrl);
             })
             .AddSingleton<ISpotifyClient>(provider =>
             {
@@ -40,7 +41,7 @@ public class Startup
             .AddScoped<IInlineQueryService, InlineQueryService>();
 
         services.AddApplicationInsightsTelemetry();
-            
+
         services.AddControllers().AddNewtonsoftJson();
     }
 

@@ -10,6 +10,7 @@ services:
       - "65502:80"
     environment:
       Telegram:Token:
+      Telegram:ApiUrl:
       Spotify:ClientId:
       Spotify:ClientSecret:
       ApplicationInsights:InstrumentationKey:

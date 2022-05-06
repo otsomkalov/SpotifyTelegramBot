@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Check current dir
-        run: dir
       - name: Build the Docker image
         run: docker-compose -f ./docker-compose.yml build
+      - name: Run docker container
+        run: docker-compose -f ./docker-compose.yml -f /root/spotify-telegram-bot-copy.yml -d

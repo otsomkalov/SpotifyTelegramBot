@@ -3,7 +3,10 @@ version: '3.1'
 services:
   spotify-telegram-bot:
     container_name: spotify-telegram-bot
-    image: infinitu1327/spotifybot
+    build:
+      context: .
+      dockerfile: ./Bot/Dockerfile
+    image: spotify-telegram-bot:latest
     depends_on:
       - telegram-bot-api
     ports:

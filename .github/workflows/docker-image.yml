@@ -14,5 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Change directory
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag test:latest
+      run: docker build . --file **/Dockerfile --tag test:latest

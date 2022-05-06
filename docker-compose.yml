@@ -21,6 +21,8 @@ services:
     image: aiogram/telegram-bot-api:latest
     ports:
       - "65500:8081"
+    volumes:
+      - /telegram-bot-api-data:/var/lib/telegram-bot-api
     environment:
       TELEGRAM_API_ID:
       TELEGRAM_API_HASH:

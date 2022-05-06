@@ -17,4 +17,4 @@ jobs:
       - name: Check current dir
         run: dir
       - name: Build the Docker image
-        run: docker-compose -f **/docker-compose.yml build
+        run: docker-compose -f ./docker-compose.yml build

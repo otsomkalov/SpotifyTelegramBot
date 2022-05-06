@@ -23,4 +23,4 @@ jobs:
 
     steps:
       - name: Run docker container
-        run: docker-compose -f ./docker-compose.yml -f /root/spotify-telegram-bot-copy.yml up -d
+        run: docker-compose -f ./docker-compose.yml -f /root/spotify-telegram-bot.yml up -d

@@ -10,7 +10,10 @@ WORKDIR "/src/Bot"
 RUN dotnet build "Bot.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Bot.csproj" -c Release -o /app/publish
+RUN dotnet publish "Bot.csproj" -c Release -o /app/publish \
+    --runtime alpine-x64 \
+    --self-contained true \
+    /p:PublishSingleFile=true
 
 FROM base AS final
 WORKDIR /app

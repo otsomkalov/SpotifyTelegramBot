@@ -1,0 +1,16 @@
+version: '3.0'
+
+services:
+  spotify-telegram-bot-prod:
+    container_name: spotify-telegram-bot-prod
+    image: spotify-telegram-bot:latest
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Bot/Dockerfile
+    environment:
+      Telegram:Token:
+      Telegram:ApiUrl:
+      Spotify:ClientId:
+      Spotify:ClientSecret:
+      ApplicationInsights:InstrumentationKey:

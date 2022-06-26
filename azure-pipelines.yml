@@ -9,30 +9,22 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  ImageName: 'infinitu1327/spotifybot'
+  Runtime: 'linux-x64'
 
-stages:
-- stage: Build
-  displayName: Build image
-  jobs:
-  - job: Build
-    displayName: Build and push the Docker image
-    steps:
-    - task: Docker@1
-      displayName: 'Build and push the Docker image'
-      inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: 'DockerHub'
-        command: 'Build an image'
-        dockerFile: '**/Dockerfile'
-        imageName: '$(ImageName)'
-        includeLatestTag: true
-        useDefaultContext: false
-        buildContext: '.'
-    - task: Docker@1
-      displayName: 'Push the Docker image to Dockerhub'
-      inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: 'DockerHub'
-        command: 'Push an image'
-        imageName: '$(ImageName)'
+steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'restore'
+      arguments: '-r $(Runtime)'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      arguments: '-c Release -r $(Runtime)'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'publish'
+      arguments: '-c Release -r $(Runtime) -p:PublishReadyToRun=true -o publish'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'

@@ -21,7 +21,7 @@ steps:
     name: Build
     inputs:
       command: 'build'
-      arguments: '-c Release -r $(Runtime)'
+      arguments: '-c Release -r $(Runtime) --no-self-contained'
   - task: DotNetCoreCLI@2
     name: Publish
     inputs:

@@ -21,12 +21,16 @@ steps:
     name: Build
     inputs:
       command: 'build'
-      arguments: '-c Release -r $(Runtime)'
+      configuration: 'Release'
+      projects: '**/*.fsproj'
+      arguments: '-r $(Runtime)'
   - task: DotNetCoreCLI@2
     name: Publish
     inputs:
       command: 'publish'
-      arguments: '-c Release -r $(Runtime) -p:PublishReadyToRun=true -o publish'
+      configuration: 'Release'
+      projects: '**/*.fsproj'
+      arguments: '-r $(Runtime) -p:PublishReadyToRun=true -o publish'
   - task: PublishBuildArtifacts@1
     name: Pack
     inputs:

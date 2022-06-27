@@ -32,6 +32,7 @@ steps:
       configuration: 'Release'
       projects: '**/Bot.fsproj'
       arguments: '-r $(Runtime) -p:PublishReadyToRun=true -o publish'
+      publishWebProjects: false
   - task: PublishBuildArtifacts@1
     name: Pack
     inputs:

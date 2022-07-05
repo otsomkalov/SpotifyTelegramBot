@@ -30,7 +30,7 @@ steps:
       command: 'publish'
       configuration: 'Release'
       projects: '**/Bot.fsproj'
-      arguments: '-r $(Runtime) -p:PublishReadyToRun=true -o publish'
+      arguments: '-r $(Runtime) -p:PublishReadyToRun=true -o $(Build.ArtifactStagingDirectory)/publish'
   - task: PublishBuildArtifacts@1
     name: Pack
     inputs:

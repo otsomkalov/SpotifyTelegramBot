@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="AlbumContent" xml:space="preserve">
+        <value>
+&lt;a href="{0}"&gt;{1}&lt;/a&gt;
+Artists: {2}
+Release date: {3}
+        </value>
+    </data>
+    <data name="ArtistContent" xml:space="preserve">
+        <value>
+&lt;a href="{0}"&gt;{1}&lt;/a&gt;
+{2}
+        </value>
+    </data>
+    <data name="PlaylistContent" xml:space="preserve">
+        <value>
+&lt;a href="{0}"&gt;{1}&lt;/a&gt;
+Owner: {2}
+        </value>
+    </data>
+    <data name="TrackContent" xml:space="preserve">
+        <value>
+&lt;a href="{0}"&gt;{1}&lt;/a&gt;
+Artists: {2}
+Album: &lt;a href="{3}"&gt;{4}&lt;/a&gt;
+Duration: {5}
+        </value>
+    </data>
+    <data name="AlbumDescription" xml:space="preserve">
+        <value>
+{0}
+Album
+        </value>
+    </data>
+    <data name="ArtistDescription" xml:space="preserve">
+        <value>
+{0}
+Artist
+        </value>
+    </data>
+    <data name="PlaylistDescription" xml:space="preserve">
+        <value>
+Owner: {0}
+Playlist
+        </value>
+    </data>
+    <data name="TrackDescription" xml:space="preserve">
+        <value>
+{0}
+Track
+        </value>
+    </data>
+</root>

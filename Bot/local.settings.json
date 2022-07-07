@@ -3,8 +3,9 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=True",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "Telegram__Token": "<Spotify app Client Id>",
-    "Spotify__ClientId": "<Spotify app ClientSecret>",
-    "Spotify__ClientSecret": "<Telegram bot token>"
+    "Telegram__Token": "<Telegram bot token>",
+    "Spotify__ClientId": "<Spotify app Client Id>",
+    "Spotify__ClientSecret": "<Spotify app ClientSecret>",
+    "Spotify__CallbackUrl": "<Spotify login callback url>"
   }
 }

@@ -1,10 +1,14 @@
 ﻿namespace Bot
 
 open System
+open System.Reflection
+open Bot.Data
 open Bot.Services
 open Bot.Settings
 open Microsoft.Azure.Functions.Extensions.DependencyInjection
+open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Options
 open SpotifyAPI.Web
 open Telegram.Bot
@@ -35,6 +39,18 @@ type Startup() =
 
     SpotifyClient(config) :> ISpotifyClient
 
+  let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBuilder) =
+    let settings =
+      provider
+        .GetRequiredService<IOptions<DatabaseSettings.T>>()
+        .Value
+
+    builder.UseNpgsql(settings.ConnectionString)
+
+    builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+
+    ()
+
   override this.Configure(builder: IFunctionsHostBuilder) : unit =
     let configuration =
       builder.GetContext().Configuration
@@ -43,6 +59,9 @@ type Startup() =
       .Services
       .Configure<TelegramSettings.T>(configuration.GetSection(TelegramSettings.SectionName))
       .Configure<SpotifySettings.T>(configuration.GetSection(SpotifySettings.SectionName))
+      .Configure<DatabaseSettings.T>(configuration.GetSection(DatabaseSettings.SectionName))
+
+    builder.Services.AddDbContext<AppDbContext>(configureDbContext)
 
     builder
       .Services
@@ -51,8 +70,19 @@ type Startup() =
 
     builder
       .Services
-      .AddSingleton<MessageService>()
-      .AddSingleton<InlineQueryService>()
+      .AddSingleton<SpotifyRefreshTokenStore>()
+      .AddSingleton<SpotifyClientStore>()
+
+      .AddScoped<SpotifyClientProvider>()
+      .AddScoped<SpotifyService>()
+      .AddScoped<MessageService>()
+      .AddScoped<InlineQueryService>()
+
+    ()
+
+  override this.ConfigureAppConfiguration(builder: IFunctionsConfigurationBuilder) =
+
+    builder.ConfigurationBuilder.AddUserSecrets(Assembly.GetExecutingAssembly(), true)
 
     ()
 

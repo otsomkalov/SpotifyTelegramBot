@@ -4,8 +4,10 @@
     "AzureWebJobsStorage": "UseDevelopmentStorage=True",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
     "Telegram__Token": "<Telegram bot token>",
+    "Telegram__BotUrl": "<Telegram bot url, e.g. https://t.me/*bot_name*>",
     "Spotify__ClientId": "<Spotify app Client Id>",
     "Spotify__ClientSecret": "<Spotify app ClientSecret>",
-    "Spotify__CallbackUrl": "<Spotify login callback url>"
+    "Spotify__CallbackUrl": "<Spotify login callback url>",
+    "Database__ConnectionString": "<PostgreSQL connection string>"
   }
 }

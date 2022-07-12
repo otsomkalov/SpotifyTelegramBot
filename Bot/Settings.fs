@@ -1,5 +1,6 @@
-﻿module Bot.Settings
+﻿namespace Bot.Settings
 
+open System
 open Microsoft.FSharp.Core
 
 module TelegramSettings =
@@ -7,7 +8,7 @@ module TelegramSettings =
   let SectionName = "Telegram"
 
   [<CLIMutable>]
-  type T = { Token: string }
+  type T = { Token: string; BotUrl: string }
 
 module SpotifySettings =
   [<Literal>]
@@ -16,4 +17,12 @@ module SpotifySettings =
   [<CLIMutable>]
   type T =
     { ClientId: string
-      ClientSecret: string }
+      ClientSecret: string
+      CallbackUrl: Uri }
+
+module DatabaseSettings =
+  [<Literal>]
+  let SectionName = "Database"
+
+  [<CLIMutable>]
+  type T = { ConnectionString: string }

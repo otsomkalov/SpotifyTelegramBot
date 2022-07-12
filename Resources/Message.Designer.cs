@@ -79,7 +79,7 @@ namespace Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This bot allows you search &amp; share songs, albums and artists from Spotify. It works on every dialog, just type @sptfyqbot in message input.
+        ///   Looks up a localized string similar to This bot allows you search &amp; share songs, albums and artists from Spotify. It works on every dialog, just type @sptfyqbot in message input. You can login to this bot via Spotify to see in search which items you liked..
         /// </summary>
         public static string Welcome {
             get {

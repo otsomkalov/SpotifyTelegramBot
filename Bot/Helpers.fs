@@ -1,27 +1,25 @@
-﻿module Bot.Helpers
+﻿namespace Bot.Helpers
 
-open Resources
 open System
 open System.Collections.Generic
 open Microsoft.FSharp.Core
 open SpotifyAPI.Web
 open Telegram.Bot.Types.Enums
 open Telegram.Bot.Types.InlineQueryResults
-open Telegram.Bot.Types.ReplyMarkups
 
-let (|StartsWith|_|) (prefix: string) (str: string) =
-  if str.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase) then
-    Some()
-  else
-    None
+module String =
+  let (|StartsWith|_|) (prefix: string) (str: string) =
+    if str.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase) then
+      Some()
+    else
+      None
+
+  let (|CommandData|_|) (str: string) =
+    match str.Split(" ") with
+    | [| _; data |] -> Some(data)
+    | _ -> None
 
 module Telegram =
-  module InlineKeyboardMarkup =
-    let StartKeyboardMarkup =
-      [ InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(Message.Search)
-        InlineKeyboardButton.WithSwitchInlineQuery(Message.Share) ]
-      |> InlineKeyboardMarkup
-
   module InlineQueryResult =
 
     let inline private getThumbUrl (item: ^a) =

@@ -4,7 +4,8 @@ trigger:
       - main
   paths:
     exclude:
-      - 'README.MD'
+      - README.MD
+      - azure-pipelines.yml
 
 pr:
   - main

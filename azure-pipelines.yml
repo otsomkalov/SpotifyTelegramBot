@@ -6,6 +6,7 @@ trigger:
     exclude:
       - README.MD
       - azure-pipelines.yml
+      - '.github/*'
 
 pr:
   - main

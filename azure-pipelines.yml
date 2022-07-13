@@ -2,6 +2,10 @@ trigger:
   branches:
     include:
       - main
+  paths:
+    exclude:
+      - README.MD
+      - azure-pipelines.yml
 
 pr:
   - main

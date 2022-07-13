@@ -6,7 +6,7 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
 
 ### Prerequisites
 
-- [.NET Core 3.1](https://dotnet.microsoft.com/download) or higher
+- [.NET 6](https://dotnet.microsoft.com/download) or higher
 
 ### Installing
 
@@ -15,6 +15,7 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
 1. Go to [Spotify Developer Portal](https://developer.spotify.com)
 2. Register new application
 3. Copy **Client Id** and **Client Secret**
+4. Add callback url of /api/spotify/callback function to allowed callback urls
 
 **Telegram:**
 
@@ -29,11 +30,14 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
    run [locally](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-local)
 3. Update Azure Functions app configuration according to table below
 
-| Parameter | Required? | Description |
-| --- | --- | --- |
-| Spotify__ClientId | true | Spotify app Client Id |
-| Spotify__ClientSecret| true | Spotify app ClientSecret |
-| Telegram__Token | true | Telegram bot token |
+| Parameter                  | Required? | Description                                                                                         |
+|----------------------------|-----------|-----------------------------------------------------------------------------------------------------|
+| Database__ConnectionString | true      | Connection string to PostgreSQL DB to store users and their spotify refresh tokens                  |
+| Spotify__CallbackUrl       | true      | Callback url of function to handle Spotify callback. Should be url of api/spotify/callback function |
+| Spotify__ClientId          | true      | Spotify app Client Id                                                                               |
+| Spotify__ClientSecret      | true      | Spotify app ClientSecret                                                                            |
+| Telegram__BotUrl           | true      | Url of your telegram bot. E.g. https://t.me/sptfyqbot                                               |
+| Telegram__Token            | true      | Telegram bot token                                                                                  |
 
 ## Usage
 

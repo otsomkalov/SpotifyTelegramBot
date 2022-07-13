@@ -4,7 +4,7 @@ trigger:
       - main
   paths:
     exclude:
-      - '**/*.MD'
+      - 'README.MD'
 
 pr:
   - main

@@ -136,48 +136,13 @@ type SpotifyService
       return spotifyUserProfile.Id
     }
 
-type UserService(_context: AppDbContext, _userIdStore: UserIdStore) =
-  let createAsync id =
-    task {
-      let user =
-        { Id = id
-          SpotifyId = null
-          SpotifyRefreshToken = null }
-
-      let! _ = _context.Users.AddAsync user
-      let! _ = _context.SaveChangesAsync()
-
-      return ()
-    }
-
-  let createIfNotExistsAsync id =
-    task {
-      let! user = _context.Users.TryFirstTaskAsync(fun u -> u.Id = id)
-
-      return!
-        match user with
-        | Some _ -> Task.FromResult()
-        | None -> createAsync id
-    }
-
-  member this.CreateIfNotExistsAsync id =
-    if _userIdStore.Contains id then
-      Task.FromResult()
-    else
-      task {
-        do! createIfNotExistsAsync id
-        _userIdStore.Add id
-        return ()
-      }
-
 type MessageService
   (
     _bot: ITelegramBotClient,
     _spotifyService: SpotifyService,
     _spotifyClientStore: SpotifyClientStore,
     _spotifyRefreshTokenStore: SpotifyRefreshTokenStore,
-    _context: AppDbContext,
-    _userService: UserService
+    _context: AppDbContext
   ) =
   let processEmptyStartCommandAsync (message: Message) =
     task {
@@ -257,8 +222,6 @@ type MessageService
 
   member this.ProcessAsync(message: Message) =
     task {
-      do! _userService.CreateIfNotExistsAsync message.From.Id
-
       let processMessageFunc =
         match message.Text with
         | StartsWith "/start" -> processStartCommandAsync
@@ -271,7 +234,6 @@ type InlineQueryService
   (
     _bot: ITelegramBotClient,
     _spotifyClientProvider: SpotifyClientProvider,
-    _userService: UserService,
     _appSpotifyClient: ISpotifyClient
   ) =
   let processInlineQueryAsync (inlineQuery: InlineQuery) =
@@ -326,13 +288,12 @@ type InlineQueryService
 
   member this.ProcessAsync(inlineQuery: InlineQuery) =
     task {
-      do! _userService.CreateIfNotExistsAsync inlineQuery.From.Id
-
       let! userSpotifyClient = _spotifyClientProvider.GetClientAsync inlineQuery.From.Id
 
       let processInlineQueryFunc =
         match userSpotifyClient, String.IsNullOrEmpty inlineQuery.Query with
         | Some client, true -> processEmptyInlineQueryAsync client
+        | None, true -> fun _ -> Task.FromResult()
         | _ -> processInlineQueryAsync
 
       return! processInlineQueryFunc inlineQuery

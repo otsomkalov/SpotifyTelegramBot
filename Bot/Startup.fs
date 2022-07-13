@@ -76,7 +76,6 @@ type Startup() =
 
       .AddScoped<SpotifyClientProvider>()
       .AddScoped<SpotifyService>()
-      .AddScoped<UserService>()
       .AddScoped<MessageService>()
       .AddScoped<InlineQueryService>()
 

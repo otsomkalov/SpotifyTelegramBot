@@ -2,6 +2,6 @@
 
 updates:
   - package-ecosystem: "nuget"
-    directory: "/ "
+    directory: "/"
     schedule:
       interval: "weekly"

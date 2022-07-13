@@ -32,12 +32,12 @@ Telegram Bot to explore [Spotify](https://www.spotify.com/).
 
 | Parameter                  | Required? | Description                                                                                         |
 |----------------------------|-----------|-----------------------------------------------------------------------------------------------------|
+| Database__ConnectionString | true      | Connection string to PostgreSQL DB to store users and their spotify refresh tokens                  |
+| Spotify__CallbackUrl       | true      | Callback url of function to handle Spotify callback. Should be url of api/spotify/callback function |
 | Spotify__ClientId          | true      | Spotify app Client Id                                                                               |
 | Spotify__ClientSecret      | true      | Spotify app ClientSecret                                                                            |
-| Spotify__CallbackUrl       | true      | Callback url of function to handle Spotify callback. Should be url of api/spotify/callback function |
-| Telegram__Token            | true      | Telegram bot token                                                                                  |
 | Telegram__BotUrl           | true      | Url of your telegram bot. E.g. https://t.me/sptfyqbot                                               |
-| Database__ConnectionString | true      | Connection string to PostgreSQL DB to store users and their spotify refresh tokens                  |
+| Telegram__Token            | true      | Telegram bot token                                                                                  |
 
 ## Usage
 

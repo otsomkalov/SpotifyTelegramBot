@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open Microsoft.FSharp.Core
 open SpotifyAPI.Web
+open Telegram.Bot.Types
 open Telegram.Bot.Types.Enums
 open Telegram.Bot.Types.InlineQueryResults
 
@@ -119,3 +120,6 @@ module Telegram =
         ThumbUrl = getThumbUrl track.Album,
         Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track)
       )
+
+  module Shared =
+    let inline getUserId (item: ^a) = (^a: (member From: User) item).Id

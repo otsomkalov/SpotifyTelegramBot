@@ -72,9 +72,11 @@ type Startup() =
       .Services
       .AddSingleton<SpotifyRefreshTokenStore>()
       .AddSingleton<SpotifyClientStore>()
+      .AddSingleton<UserIdStore>()
 
       .AddScoped<SpotifyClientProvider>()
       .AddScoped<SpotifyService>()
+      .AddScoped<UserService>()
       .AddScoped<MessageService>()
       .AddScoped<InlineQueryService>()
 

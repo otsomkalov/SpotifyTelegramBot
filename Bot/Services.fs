@@ -14,8 +14,8 @@ open Bot.Helpers
 open Bot.Helpers.String
 open Telegram.Bot.Types.InlineQueryResults
 open Telegram.Bot.Types.ReplyMarkups
-open Microsoft.EntityFrameworkCore
 open EntityFrameworkCore.FSharp.DbContextHelpers
+open System.Linq
 
 type SpotifyRefreshTokenStore() =
   let tokens = Dictionary<string, string>()
@@ -30,7 +30,7 @@ type SpotifyRefreshTokenStore() =
 
 type SpotifyClientStore() =
   let clients =
-    Dictionary<int64, SpotifyClient>()
+    Dictionary<int64, ISpotifyClient>()
 
   member this.AddClient telegramId client =
     if clients.ContainsKey telegramId then
@@ -44,9 +44,14 @@ type SpotifyClientStore() =
     else
       None
 
+type UserIdStore() =
+  let ids = HashSet<int64>()
+
+  member this.Contains id = ids.Contains id
+  member this.Add id = ids.Add id |> ignore
+
 type SpotifyClientProvider(_context: AppDbContext, _spotifyClientStore: SpotifyClientStore, _spotifyOptions: IOptions<SpotifySettings.T>) =
   let _spotifySettings = _spotifyOptions.Value
-
   let createClient refreshToken =
     let tokenResponse =
       AuthorizationCodeTokenResponse(CreatedAt = DateTime.UtcNow.AddSeconds(-86400), RefreshToken = refreshToken)
@@ -57,31 +62,33 @@ type SpotifyClientProvider(_context: AppDbContext, _spotifyClientStore: SpotifyC
         .CreateDefault()
         .WithAuthenticator
 
-    SpotifyClient(spotifyClientConfig)
+    SpotifyClient(spotifyClientConfig) :> ISpotifyClient
 
   let createClientAsync' (telegramId: int64) =
     task {
-      let! user = _context.Users.FirstOrDefaultAsync(fun u -> u.Id = telegramId)
+      let! spotifyRefreshToken = _context.Users.Where(fun u -> u.Id = telegramId).Select(fun u -> u.SpotifyRefreshToken).TryFirstTaskAsync()
 
-      let spotifyClient =
-        createClient user.SpotifyRefreshToken
-
-
-      return spotifyClient
+      return
+        match spotifyRefreshToken with
+        | Some token -> Some(createClient token)
+        | None -> None
     }
 
   let createClientAsync (telegramId: int64) =
     task {
       let! client = createClientAsync' telegramId
 
-      _spotifyClientStore.AddClient telegramId client
-
-      return client
+      return
+        match client with
+        | Some c ->
+          _spotifyClientStore.AddClient telegramId c
+          Some c
+        | None -> None
     }
 
   member this.GetClientAsync(telegramId: int64) =
     match _spotifyClientStore.GetClient telegramId with
-    | Some client -> Task.FromResult client
+    | Some client -> Task.FromResult(Some client)
     | None -> createClientAsync telegramId
 
 type SpotifyService
@@ -125,13 +132,48 @@ type SpotifyService
       return spotifyUserProfile.Id
     }
 
+type UserService(_context: AppDbContext, _userIdStore: UserIdStore) =
+  let createAsync id =
+    task {
+      let user =
+        { Id = id
+          SpotifyId = null
+          SpotifyRefreshToken = null }
+
+      let! _ = _context.Users.AddAsync user
+      let! _ = _context.SaveChangesAsync()
+
+      return ()
+    }
+
+  let createIfNotExistsAsync id =
+    task {
+      let! user = _context.Users.TryFirstTaskAsync(fun u -> u.Id = id)
+
+      return!
+        match user with
+        | Some _ -> Task.FromResult()
+        | None -> createAsync id
+    }
+
+  member this.CreateIfNotExistsAsync(id: int64) =
+    if _userIdStore.Contains id then
+      Task.FromResult()
+    else
+      task {
+        do! createIfNotExistsAsync id
+        _userIdStore.Add id
+        return ()
+      }
+
 type MessageService
   (
     _bot: ITelegramBotClient,
     _spotifyService: SpotifyService,
     _spotifyClientStore: SpotifyClientStore,
     _spotifyRefreshTokenStore: SpotifyRefreshTokenStore,
-    _context: AppDbContext
+    _context: AppDbContext,
+    _userService: UserService
   ) =
   let processEmptyStartCommandAsync (message: Message) =
     task {
@@ -210,17 +252,27 @@ type MessageService
     }
 
   member this.ProcessAsync(message: Message) =
-    let processMessageFunc =
-      match message.Text with
-      | StartsWith "/start" -> processStartCommandAsync
-      | _ -> processUnknownCommandAsync
-
-    processMessageFunc message
-
-type InlineQueryService(_bot: ITelegramBotClient, _spotifyClient: ISpotifyClient) =
-  let processInlineQueryAsync (inlineQuery: InlineQuery) =
     task {
-      let! response = _spotifyClient.Search.Item(SearchRequest(SearchRequest.Types.All, inlineQuery.Query, Limit = 4))
+      do! _userService.CreateIfNotExistsAsync message.From.Id
+
+      let processMessageFunc =
+        match message.Text with
+        | StartsWith "/start" -> processStartCommandAsync
+        | _ -> processUnknownCommandAsync
+
+      return! processMessageFunc message
+    }
+
+type InlineQueryService
+  (
+    _bot: ITelegramBotClient,
+    _spotifyClientProvider: SpotifyClientProvider,
+    _userService: UserService,
+    _appSpotifyClient: ISpotifyClient
+  ) =
+  let processInlineQueryAsync (inlineQuery: InlineQuery) (spotifyClient: ISpotifyClient) =
+    task {
+      let! response = spotifyClient.Search.Item(SearchRequest(SearchRequest.Types.All, inlineQuery.Query, Limit = 4))
 
       let tracks =
         response.Tracks.Items
@@ -249,11 +301,41 @@ type InlineQueryService(_bot: ITelegramBotClient, _spotifyClient: ISpotifyClient
       return ()
     }
 
-  member this.ProcessAsync(inlineQuery: InlineQuery) =
-    let processInlineQueryFunc =
-      if String.IsNullOrEmpty(inlineQuery.Query) |> not then
-        processInlineQueryAsync
-      else
-        fun _ -> Task.FromResult()
+  let processEmptyInlineQueryAsync (inlineQuery: InlineQuery) (spotifyClient: ISpotifyClient) =
+    task {
+      let! recentlyPlayed =
+        PlayerRecentlyPlayedRequest(Limit = 50)
+        |> spotifyClient.Player.GetRecentlyPlayed
 
-    processInlineQueryFunc inlineQuery
+      let results =
+        recentlyPlayed.Items
+        |> Seq.map (fun i -> i.Track)
+        |> Seq.distinctBy (fun t -> t.Id)
+        |> Seq.map Telegram.InlineQueryResult.GetTrackInlineQueryArticle
+        |> Seq.filter (fun a -> a.Title |> String.IsNullOrEmpty |> not)
+        |> Seq.map (fun a -> a :> InlineQueryResult)
+
+      let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, results)
+
+      return ()
+    }
+
+  member this.ProcessAsync(inlineQuery: InlineQuery) =
+    task {
+      do! _userService.CreateIfNotExistsAsync inlineQuery.From.Id
+
+      let! userSpotifyClient = _spotifyClientProvider.GetClientAsync inlineQuery.From.Id
+
+      let spotifyClient =
+        match userSpotifyClient with
+        | Some c -> c
+        | None -> _appSpotifyClient
+
+      let processInlineQueryFunc =
+        if String.IsNullOrEmpty inlineQuery.Query then
+          processEmptyInlineQueryAsync
+        else
+          processInlineQueryAsync
+
+      return! processInlineQueryFunc inlineQuery spotifyClient
+    }

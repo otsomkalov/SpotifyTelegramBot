@@ -42,12 +42,6 @@ type SpotifyClientStore() =
     | true -> Some clients[telegramId]
     | false -> None
 
-type UserIdStore() =
-  let ids = HashSet<int64>()
-
-  member this.Contains id = ids.Contains id
-  member this.Add id = ids.Add id |> ignore
-
 type SpotifyClientProvider(_context: AppDbContext, _spotifyClientStore: SpotifyClientStore, _spotifyOptions: IOptions<SpotifySettings.T>) =
   let _spotifySettings = _spotifyOptions.Value
 

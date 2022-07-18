@@ -62,9 +62,9 @@ namespace Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///&lt;a href=&quot;{0}&quot;&gt;{1}&lt;/a&gt;
-        ///Artists: {2}
-        ///Release date: {3}
+        ///&lt;a href=&quot;{0}&quot;&gt;{1}&lt;/a&gt; {2}
+        ///Artists: {3}
+        ///Release date: {4}
         ///        .
         /// </summary>
         public static string AlbumContent {
@@ -75,7 +75,7 @@ namespace Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///{0}
+        ///{0} {1}
         ///Album
         ///        .
         /// </summary>
@@ -135,10 +135,10 @@ namespace Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///&lt;a href=&quot;{0}&quot;&gt;{1}&lt;/a&gt;
-        ///Artists: {2}
-        ///Album: &lt;a href=&quot;{3}&quot;&gt;{4}&lt;/a&gt;
-        ///Duration: {5}
+        ///&lt;a href=&quot;{0}&quot;&gt;{1}&lt;/a&gt; {2}
+        ///Artists: {3}
+        ///Album: &lt;a href=&quot;{4}&quot;&gt;{5}&lt;/a&gt;
+        ///Duration: {6}
         ///        .
         /// </summary>
         public static string TrackContent {
@@ -149,7 +149,7 @@ namespace Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///{0}
+        ///{0} {1}
         ///Track
         ///        .
         /// </summary>

@@ -46,11 +46,14 @@ module Telegram =
       |> String.concat ", "
       |> sprintf "Genres: %s"
 
-    let GetAlbumInlineQueryArticle (album: SimpleAlbum) =
+    let FromAlbumForUser (album: SimpleAlbum) liked =
+      let likedStr = if liked then "❤️" else String.Empty
+
       let albumMarkdown =
         String.Format(
           Resources.InlineQueryResult.AlbumContent,
           album.ExternalUrls["spotify"],
+          likedStr,
           album.Name,
           getArtistsLinks album,
           album.ReleaseDate
@@ -61,14 +64,16 @@ module Telegram =
         album.Name,
         InputTextMessageContent(albumMarkdown, ParseMode = ParseMode.Html),
         ThumbUrl = getThumbUrl album,
-        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, getArtistsNames album)
+        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, getArtistsNames album, likedStr)
       )
 
-    let GetArtistInlineQueryArticle (artist: FullArtist) =
+    let FromAlbumForAnonymousUser album =
+      FromAlbumForUser album false
+
+    let FromArtist (artist: FullArtist) =
       let artistMarkdown =
         String.Format(
           Resources.InlineQueryResult.ArtistContent,
-          artist.ExternalUrls["spotify"],
           artist.ExternalUrls["spotify"],
           artist.Name,
           getArtistGenres artist
@@ -82,7 +87,7 @@ module Telegram =
         Description = String.Format(Resources.InlineQueryResult.ArtistDescription, getArtistGenres artist)
       )
 
-    let GetPlaylistInlineQueryArticle (playlist: SimplePlaylist) =
+    let FromPlaylist (playlist: SimplePlaylist) =
       let playlistMarkdown =
         String.Format(
           Resources.InlineQueryResult.PlaylistContent,
@@ -99,12 +104,15 @@ module Telegram =
         Description = String.Format(Resources.InlineQueryResult.PlaylistDescription, playlist.Owner.DisplayName)
       )
 
-    let GetTrackInlineQueryArticle (track: FullTrack) =
+    let FromTrackForUser (track: FullTrack) liked =
+      let likedStr = if liked then "❤️" else String.Empty
+
       let trackMarkdown =
         String.Format(
           Resources.InlineQueryResult.TrackContent,
           track.ExternalUrls["spotify"],
           track.Name,
+          likedStr,
           getArtistsLinks track,
           track.Album.ExternalUrls["spotify"],
           track.Album.Name,
@@ -118,8 +126,11 @@ module Telegram =
         track.Name,
         InputTextMessageContent(trackMarkdown, ParseMode = ParseMode.Html),
         ThumbUrl = getThumbUrl track.Album,
-        Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track)
+        Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track, likedStr)
       )
+
+    let FromTrackFromAnonymousUser track =
+      FromTrackForUser track false
 
   module Shared =
     let inline getUserId (item: ^a) = (^a: (member From: User) item).Id

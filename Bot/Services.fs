@@ -25,8 +25,7 @@ type SpotifyRefreshTokenStore() =
     | true -> tokens[spotifyId] <- refreshToken
     | false -> tokens.Add(spotifyId, refreshToken)
 
-  member this.GetToken spotifyId =
-    tokens[spotifyId]
+  member this.GetToken spotifyId = tokens[spotifyId]
 
 type SpotifyClientStore() =
   let clients =
@@ -224,36 +223,76 @@ type MessageService
       return! processMessageFunc message
     }
 
-type InlineQueryService
-  (
-    _bot: ITelegramBotClient,
-    _spotifyClientProvider: SpotifyClientProvider,
-    _appSpotifyClient: ISpotifyClient
-  ) =
-  let processInlineQueryAsync (inlineQuery: InlineQuery) =
+type InlineQueryService(_bot: ITelegramBotClient, _spotifyClientProvider: SpotifyClientProvider, _appSpotifyClient: ISpotifyClient) =
+  let processAnonymousInlineQueryAsync (inlineQuery: InlineQuery) =
     task {
       let! response = _appSpotifyClient.Search.Item(SearchRequest(SearchRequest.Types.All, inlineQuery.Query, Limit = 4))
 
       let tracks =
         response.Tracks.Items
-        |> Seq.map Telegram.InlineQueryResult.GetTrackInlineQueryArticle
+        |> Seq.map Telegram.InlineQueryResult.FromTrackFromAnonymousUser
 
       let albums =
         response.Albums.Items
-        |> Seq.map Telegram.InlineQueryResult.GetAlbumInlineQueryArticle
+        |> Seq.map Telegram.InlineQueryResult.FromAlbumForAnonymousUser
 
       let artists =
         response.Artists.Items
-        |> Seq.map Telegram.InlineQueryResult.GetArtistInlineQueryArticle
+        |> Seq.map Telegram.InlineQueryResult.FromArtist
 
       let playlists =
         response.Playlists.Items
-        |> Seq.map Telegram.InlineQueryResult.GetPlaylistInlineQueryArticle
+        |> Seq.map Telegram.InlineQueryResult.FromPlaylist
 
       let results =
         [ tracks; albums; artists; playlists ]
         |> Seq.collect id
-        |> Seq.filter (fun a -> a.Title |> String.IsNullOrEmpty |> not)
+        |> Seq.distinctBy (fun a -> a.Id)
+        |> Seq.map (fun a -> a :> InlineQueryResult)
+
+      let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, results)
+
+      return ()
+    }
+
+  let processUserInlineQueryAsync (client: ISpotifyClient) (inlineQuery: InlineQuery) =
+    task {
+      let! response = client.Search.Item(SearchRequest(SearchRequest.Types.All, inlineQuery.Query, Limit = 4))
+
+      let! likedTracks =
+        response.Tracks.Items
+        |> Seq.map (fun i -> i.Id)
+        |> List
+        |> LibraryCheckTracksRequest
+        |> client.Library.CheckTracks
+
+      let tracks =
+        Seq.zip response.Tracks.Items likedTracks
+        |> Seq.map (fun (track, liked) -> Telegram.InlineQueryResult.FromTrackForUser track liked)
+
+      let! likedAlbums =
+        response.Albums.Items
+        |> Seq.map (fun i -> i.Id)
+        |> List
+        |> LibraryCheckAlbumsRequest
+        |> client.Library.CheckAlbums
+
+      let albums =
+        Seq.zip response.Albums.Items likedAlbums
+        |> Seq.map (fun (album, liked) -> Telegram.InlineQueryResult.FromAlbumForUser album liked)
+
+      let artists =
+        response.Artists.Items
+        |> Seq.map Telegram.InlineQueryResult.FromArtist
+
+      let playlists =
+        response.Playlists.Items
+        |> Seq.map Telegram.InlineQueryResult.FromPlaylist
+
+      let results =
+        [ tracks; albums; artists; playlists ]
+        |> Seq.collect id
+        |> Seq.distinctBy (fun a -> a.Id)
         |> Seq.map (fun a -> a :> InlineQueryResult)
 
       let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, results)
@@ -267,12 +306,22 @@ type InlineQueryService
         PlayerRecentlyPlayedRequest(Limit = 50)
         |> spotifyClient.Player.GetRecentlyPlayed
 
-      let results =
+      let recentlyPlayedTracks =
         recentlyPlayed.Items
         |> Seq.map (fun i -> i.Track)
         |> Seq.distinctBy (fun t -> t.Id)
-        |> Seq.map Telegram.InlineQueryResult.GetTrackInlineQueryArticle
-        |> Seq.filter (fun a -> a.Title |> String.IsNullOrEmpty |> not)
+        |> Seq.toList
+
+      let! areTracksLiked =
+        recentlyPlayedTracks
+        |> List.map (fun t -> t.Id)
+        |> List
+        |> LibraryCheckTracksRequest
+        |> spotifyClient.Library.CheckTracks
+
+      let results =
+        Seq.zip recentlyPlayedTracks areTracksLiked
+        |> Seq.map (fun (track, liked) -> Telegram.InlineQueryResult.FromTrackForUser track liked)
         |> Seq.map (fun a -> a :> InlineQueryResult)
 
       let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, results)
@@ -287,8 +336,9 @@ type InlineQueryService
       let processInlineQueryFunc =
         match userSpotifyClient, String.IsNullOrEmpty inlineQuery.Query with
         | Some client, true -> processEmptyInlineQueryAsync client
+        | Some client, false -> processUserInlineQueryAsync client
         | None, true -> fun _ -> Task.FromResult()
-        | _ -> processInlineQueryAsync
+        | _ -> processAnonymousInlineQueryAsync
 
       return! processInlineQueryFunc inlineQuery
     }

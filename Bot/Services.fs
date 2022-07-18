@@ -244,15 +244,9 @@ type InlineQueryService(_bot: ITelegramBotClient, _spotifyClientProvider: Spotif
         response.Playlists.Items
         |> Seq.map Telegram.InlineQueryResult.FromPlaylist
 
-      let results =
+      return
         [ tracks; albums; artists; playlists ]
         |> Seq.collect id
-        |> Seq.distinctBy (fun a -> a.Id)
-        |> Seq.map (fun a -> a :> InlineQueryResult)
-
-      let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, results)
-
-      return ()
     }
 
   let processUserInlineQueryAsync (client: ISpotifyClient) (inlineQuery: InlineQuery) =
@@ -289,18 +283,13 @@ type InlineQueryService(_bot: ITelegramBotClient, _spotifyClientProvider: Spotif
         response.Playlists.Items
         |> Seq.map Telegram.InlineQueryResult.FromPlaylist
 
-      let results =
+
+      return
         [ tracks; albums; artists; playlists ]
         |> Seq.collect id
-        |> Seq.distinctBy (fun a -> a.Id)
-        |> Seq.map (fun a -> a :> InlineQueryResult)
-
-      let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, results)
-
-      return ()
     }
 
-  let processEmptyInlineQueryAsync (spotifyClient: ISpotifyClient) (inlineQuery: InlineQuery) =
+  let processEmptyInlineQueryAsync (spotifyClient: ISpotifyClient) =
     task {
       let! recentlyPlayed =
         PlayerRecentlyPlayedRequest(Limit = 50)
@@ -319,26 +308,28 @@ type InlineQueryService(_bot: ITelegramBotClient, _spotifyClientProvider: Spotif
         |> LibraryCheckTracksRequest
         |> spotifyClient.Library.CheckTracks
 
-      let results =
+      return
         Seq.zip recentlyPlayedTracks areTracksLiked
         |> Seq.map (fun (track, liked) -> Telegram.InlineQueryResult.FromTrackForUser track liked)
-        |> Seq.map (fun a -> a :> InlineQueryResult)
-
-      let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, results)
-
-      return ()
     }
 
   member this.ProcessAsync(inlineQuery: InlineQuery) =
     task {
       let! userSpotifyClient = _spotifyClientProvider.GetClientAsync inlineQuery.From.Id
 
-      let processInlineQueryFunc =
+      let! results =
         match userSpotifyClient, String.IsNullOrEmpty inlineQuery.Query with
         | Some client, true -> processEmptyInlineQueryAsync client
-        | Some client, false -> processUserInlineQueryAsync client
-        | None, true -> fun _ -> Task.FromResult()
-        | _ -> processAnonymousInlineQueryAsync
+        | Some client, false -> processUserInlineQueryAsync client inlineQuery
+        | None, true -> Task.FromResult Seq.empty
+        | _ -> processAnonymousInlineQueryAsync inlineQuery
 
-      return! processInlineQueryFunc inlineQuery
+      let filteredResults =
+        results
+        |> Seq.distinctBy (fun a -> a.Id)
+        |> Seq.map (fun a -> a :> InlineQueryResult)
+
+      let! _ = _bot.AnswerInlineQueryAsync(inlineQuery.Id, filteredResults, 0)
+
+      return ()
     }

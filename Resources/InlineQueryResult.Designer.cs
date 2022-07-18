@@ -75,7 +75,7 @@ namespace Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///{0} {1}
+        ///{0}
         ///Album
         ///        .
         /// </summary>
@@ -149,7 +149,7 @@ namespace Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///{0} {1}
+        ///{0}
         ///Track
         ///        .
         /// </summary>

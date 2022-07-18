@@ -47,7 +47,7 @@ Duration: {6}
     </data>
     <data name="AlbumDescription" xml:space="preserve">
         <value>
-{0} {1}
+{0}
 Album
         </value>
     </data>
@@ -65,7 +65,7 @@ Playlist
     </data>
     <data name="TrackDescription" xml:space="preserve">
         <value>
-{0} {1}
+{0}
 Track
         </value>
     </data>

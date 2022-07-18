@@ -61,10 +61,10 @@ module Telegram =
 
       InlineQueryResultArticle(
         album.Id,
-        album.Name,
+        [album.Name; likedStr] |> String.concat " ",
         InputTextMessageContent(albumMarkdown, ParseMode = ParseMode.Html),
         ThumbUrl = getThumbUrl album,
-        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, getArtistsNames album, likedStr)
+        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, getArtistsNames album)
       )
 
     let FromAlbumForAnonymousUser album =
@@ -123,10 +123,10 @@ module Telegram =
 
       InlineQueryResultArticle(
         track.Id,
-        track.Name,
+        [track.Name; likedStr] |> String.concat " ",
         InputTextMessageContent(trackMarkdown, ParseMode = ParseMode.Html),
         ThumbUrl = getThumbUrl track.Album,
-        Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track, likedStr)
+        Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track)
       )
 
     let FromTrackFromAnonymousUser track =

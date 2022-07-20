@@ -112,7 +112,7 @@ namespace Resources {
         /// <summary>
         ///   Looks up a localized string similar to 
         ///&lt;a href=&quot;{0}&quot;&gt;{1}&lt;/a&gt;
-        ///Owner: {2}
+        ///Owner: &lt;a href=&quot;{2}&quot;&gt;{3}&lt;/a&gt;
         ///        .
         /// </summary>
         public static string PlaylistContent {

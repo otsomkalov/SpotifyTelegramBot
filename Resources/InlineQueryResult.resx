@@ -34,7 +34,7 @@ Release date: {4}
     <data name="PlaylistContent" xml:space="preserve">
         <value>
 &lt;a href="{0}"&gt;{1}&lt;/a&gt;
-Owner: {2}
+Owner: &lt;a href="{2}"&gt;{3}&lt;/a&gt;
         </value>
     </data>
     <data name="TrackContent" xml:space="preserve">

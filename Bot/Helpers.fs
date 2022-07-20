@@ -56,8 +56,8 @@ module Telegram =
         String.Format(
           Resources.InlineQueryResult.AlbumContent,
           album.ExternalUrls["spotify"],
-          likeSymbol,
           album.Name,
+          likeSymbol,
           getArtistsLinks album.Artists,
           album.ReleaseDate
         )
@@ -90,6 +90,7 @@ module Telegram =
           Resources.InlineQueryResult.PlaylistContent,
           playlist.ExternalUrls["spotify"],
           playlist.Name,
+          playlist.Owner.ExternalUrls["spotify"],
           playlist.Owner.DisplayName
         )
 

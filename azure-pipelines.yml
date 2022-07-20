@@ -5,7 +5,6 @@ trigger:
   paths:
     exclude:
       - README.MD
-      - azure-pipelines.yml
       - '.github/*'
 
 pr:
@@ -15,7 +14,6 @@ pr:
   paths:
     exclude:
       - README.MD
-      - azure-pipelines.yml
       - '.github/*'
 
 pool:

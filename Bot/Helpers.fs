@@ -1,7 +1,6 @@
 ﻿namespace Bot.Helpers
 
 open System
-open System.Collections.Generic
 open Microsoft.FSharp.Core
 open SpotifyAPI.Web
 open Telegram.Bot.Types
@@ -22,21 +21,18 @@ module String =
 
 module Telegram =
   module InlineQueryResult =
-
-    let inline private getThumbUrl (item: ^a) =
-      match (^a: (member Images: List<Image>) item)
-            |> Seq.tryHead
-        with
+    let private getThumbUrl (images: Image seq) =
+      match images |> Seq.tryHead with
       | Some image -> image.Url
       | None -> null
 
-    let inline private getArtistsNames (item: ^a) =
-      (^a: (member Artists: List<SimpleArtist>) item)
+    let private getArtistsNames (artists: SimpleArtist seq) =
+      artists
       |> Seq.map (fun a -> a.Name)
       |> String.concat ", "
 
-    let inline private getArtistsLinks (item: ^a) =
-      (^a: (member Artists: List<SimpleArtist>) item)
+    let private getArtistsLinks (artists: SimpleArtist seq) =
+      artists
       |> Seq.map (fun artist -> $"""<a href="{artist.ExternalUrls["spotify"]}">{artist.Name}</a>""")
       |> String.concat ", "
 
@@ -47,43 +43,38 @@ module Telegram =
       |> sprintf "Genres: %s"
 
     let FromAlbumForUser (album: SimpleAlbum) liked =
-      let likedStr = if liked then "❤️" else String.Empty
+      let likeSymbol =
+        if liked then "❤️" else String.Empty
 
       let albumMarkdown =
         String.Format(
           Resources.InlineQueryResult.AlbumContent,
           album.ExternalUrls["spotify"],
-          likedStr,
+          likeSymbol,
           album.Name,
-          getArtistsLinks album,
+          getArtistsLinks album.Artists,
           album.ReleaseDate
         )
 
       InlineQueryResultArticle(
         album.Id,
-        [album.Name; likedStr] |> String.concat " ",
+        [ album.Name; likeSymbol ] |> String.concat " ",
         InputTextMessageContent(albumMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl album,
-        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, getArtistsNames album)
+        ThumbUrl = getThumbUrl album.Images,
+        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, getArtistsNames album.Artists)
       )
 
-    let FromAlbumForAnonymousUser album =
-      FromAlbumForUser album false
+    let FromAlbumForAnonymousUser album = FromAlbumForUser album false
 
     let FromArtist (artist: FullArtist) =
       let artistMarkdown =
-        String.Format(
-          Resources.InlineQueryResult.ArtistContent,
-          artist.ExternalUrls["spotify"],
-          artist.Name,
-          getArtistGenres artist
-        )
+        String.Format(Resources.InlineQueryResult.ArtistContent, artist.ExternalUrls["spotify"], artist.Name, getArtistGenres artist)
 
       InlineQueryResultArticle(
         artist.Id,
         artist.Name,
         InputTextMessageContent(artistMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl artist,
+        ThumbUrl = getThumbUrl artist.Images,
         Description = String.Format(Resources.InlineQueryResult.ArtistDescription, getArtistGenres artist)
       )
 
@@ -100,20 +91,21 @@ module Telegram =
         playlist.Id,
         playlist.Name,
         InputTextMessageContent(playlistMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl playlist,
+        ThumbUrl = getThumbUrl playlist.Images,
         Description = String.Format(Resources.InlineQueryResult.PlaylistDescription, playlist.Owner.DisplayName)
       )
 
     let FromTrackForUser (track: FullTrack) liked =
-      let likedStr = if liked then "❤️" else String.Empty
+      let likeSymbol =
+        if liked then "❤️" else String.Empty
 
       let trackMarkdown =
         String.Format(
           Resources.InlineQueryResult.TrackContent,
           track.ExternalUrls["spotify"],
           track.Name,
-          likedStr,
-          getArtistsLinks track,
+          likeSymbol,
+          getArtistsLinks track.Artists,
           track.Album.ExternalUrls["spotify"],
           track.Album.Name,
           TimeSpan
@@ -123,14 +115,13 @@ module Telegram =
 
       InlineQueryResultArticle(
         track.Id,
-        [track.Name; likedStr] |> String.concat " ",
+        [ track.Name; likeSymbol ] |> String.concat " ",
         InputTextMessageContent(trackMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl track.Album,
-        Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track)
+        ThumbUrl = getThumbUrl track.Album.Images,
+        Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track.Artists)
       )
 
-    let FromTrackFromAnonymousUser track =
-      FromTrackForUser track false
+    let FromTrackFromAnonymousUser track = FromTrackForUser track false
 
   module Shared =
     let inline getUserId (item: ^a) = (^a: (member From: User) item).Id

@@ -9,7 +9,14 @@ trigger:
       - '.github/*'
 
 pr:
-  - main
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - README.MD
+      - azure-pipelines.yml
+      - '.github/*'
 
 pool:
   vmImage: 'ubuntu-latest'

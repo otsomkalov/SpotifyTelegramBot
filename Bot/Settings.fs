@@ -1,10 +1,10 @@
-﻿namespace Bot.Settings
+﻿[<RequireQualifiedAccess>]
+module Bot.Settings
 
 open System
 open System.ComponentModel.DataAnnotations
 open Microsoft.FSharp.Core
 
-[<RequireQualifiedAccess>]
 module Telegram =
   [<Literal>]
   let SectionName = "Telegram"
@@ -16,7 +16,6 @@ module Telegram =
       [<Required>]
       BotUrl: string }
 
-[<RequireQualifiedAccess>]
 module Spotify =
   [<Literal>]
   let SectionName = "Spotify"

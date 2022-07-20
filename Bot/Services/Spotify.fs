@@ -1,9 +1,9 @@
 module Bot.Services.Spotify
 
+open Bot
 open Bot.Data
 open System
 open System.Collections.Generic
-open Bot.Settings
 open Microsoft.Extensions.Options
 open System.Threading.Tasks
 open SpotifyAPI.Web
@@ -36,7 +36,7 @@ type SpotifyClientStore() =
     | false -> None
 
 
-type SpotifyClientProvider(_context: AppDbContext, _spotifyClientStore: SpotifyClientStore, _spotifyOptions: IOptions<Spotify.T>) =
+type SpotifyClientProvider(_context: AppDbContext, _spotifyClientStore: SpotifyClientStore, _spotifyOptions: IOptions<Settings.Spotify.T>) =
   let _spotifySettings = _spotifyOptions.Value
 
   let createClient refreshToken =
@@ -86,7 +86,7 @@ type SpotifyClientProvider(_context: AppDbContext, _spotifyClientStore: SpotifyC
 
 type SpotifyService
   (
-    _spotifyOptions: IOptions<Spotify.T>,
+    _spotifyOptions: IOptions<Settings.Spotify.T>,
     _context: AppDbContext,
     _spotifyRefreshTokenStore: SpotifyRefreshTokenStore
   ) =

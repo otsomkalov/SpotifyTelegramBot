@@ -7,13 +7,13 @@ open Bot.Helpers
 open Bot.Services
 open Bot.Services.Spotify
 open Bot.Services.Telegram
-open Bot.Settings
 open Microsoft.Azure.Functions.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Options
 open SpotifyAPI.Web
+open Swan
 open Telegram.Bot
 
 #nowarn "20"
@@ -24,7 +24,7 @@ type Startup() =
   let configureTelegram (provider: IServiceProvider) =
     let settings =
       provider
-        .GetRequiredService<IOptions<Telegram.T>>()
+        .GetRequiredService<IOptions<Settings.Telegram.T>>()
         .Value
 
     TelegramBotClient(settings.Token) :> ITelegramBotClient
@@ -32,7 +32,7 @@ type Startup() =
   let configureSpotify (provider: IServiceProvider) =
     let settings =
       provider
-        .GetRequiredService<IOptions<Spotify.T>>()
+        .GetRequiredService<IOptions<Settings.Spotify.T>>()
         .Value
 
     let config =
@@ -45,7 +45,7 @@ type Startup() =
   let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBuilder) =
     let settings =
       provider
-        .GetRequiredService<IOptions<DatabaseSettings.T>>()
+        .GetRequiredService<IOptions<Settings.DatabaseSettings.T>>()
         .Value
 
     builder.UseNpgsql(settings.ConnectionString)
@@ -60,9 +60,9 @@ type Startup() =
     let services = builder.Services
 
     (services, configuration)
-    |> Startup.ConfigureAndValidate<Telegram.T> Telegram.SectionName
-    |> Startup.ConfigureAndValidate<Spotify.T> Spotify.SectionName
-    |> Startup.ConfigureAndValidate<DatabaseSettings.T> DatabaseSettings.SectionName
+    |> Startup.ConfigureAndValidate<Settings.Telegram.T> Settings.Telegram.SectionName
+    |> Startup.ConfigureAndValidate<Settings.Spotify.T> Settings.Spotify.SectionName
+    |> Startup.ConfigureAndValidate<Settings.DatabaseSettings.T> Settings.DatabaseSettings.SectionName
 
     services.AddDbContext<AppDbContext>(configureDbContext)
 

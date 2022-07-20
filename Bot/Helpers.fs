@@ -1,6 +1,8 @@
 ﻿namespace Bot.Helpers
 
 open System
+open Microsoft.Extensions.Configuration
+open Microsoft.Extensions.DependencyInjection
 open Microsoft.FSharp.Core
 open SpotifyAPI.Web
 open Telegram.Bot.Types
@@ -22,11 +24,14 @@ module String =
 module Telegram =
   module InlineQueryResult =
     let private getThumbUrl (images: Image seq) =
-      match images |> Seq.tryHead with
+      match images
+            |> Seq.sortBy (fun i -> i.Height)
+            |> Seq.tryHead
+        with
       | Some image -> image.Url
       | None -> null
 
-    let private getArtistsNames (artists: SimpleArtist seq) =
+    let private joinArtistsNames (artists: SimpleArtist seq) =
       artists
       |> Seq.map (fun a -> a.Name)
       |> String.concat ", "
@@ -61,7 +66,7 @@ module Telegram =
         [ album.Name; likeSymbol ] |> String.concat " ",
         InputTextMessageContent(albumMarkdown, ParseMode = ParseMode.Html),
         ThumbUrl = getThumbUrl album.Images,
-        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, getArtistsNames album.Artists)
+        Description = String.Format(Resources.InlineQueryResult.AlbumDescription, joinArtistsNames album.Artists)
       )
 
     let FromAlbumForAnonymousUser album = FromAlbumForUser album false
@@ -118,10 +123,19 @@ module Telegram =
         [ track.Name; likeSymbol ] |> String.concat " ",
         InputTextMessageContent(trackMarkdown, ParseMode = ParseMode.Html),
         ThumbUrl = getThumbUrl track.Album.Images,
-        Description = String.Format(Resources.InlineQueryResult.TrackDescription, getArtistsNames track.Artists)
+        Description = String.Format(Resources.InlineQueryResult.TrackDescription, joinArtistsNames track.Artists)
       )
 
     let FromTrackFromAnonymousUser track = FromTrackForUser track false
 
   module Shared =
     let inline getUserId (item: ^a) = (^a: (member From: User) item).Id
+
+module Startup =
+  let ConfigureAndValidate<'T when 'T: not struct> section (services: IServiceCollection, configuration: IConfiguration) =
+    services.AddOptions<'T>()
+      .Bind(configuration.GetSection(section))
+      .ValidateDataAnnotations()
+      |> ignore
+
+    (services, configuration)

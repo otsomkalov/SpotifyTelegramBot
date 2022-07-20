@@ -283,7 +283,6 @@ type InlineQueryService(_bot: ITelegramBotClient, _spotifyClientProvider: Spotif
         response.Playlists.Items
         |> Seq.map Telegram.InlineQueryResult.FromPlaylist
 
-
       return
         [ tracks; albums; artists; playlists ]
         |> Seq.collect id

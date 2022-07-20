@@ -1,6 +1,7 @@
 ﻿namespace Bot.Settings
 
 open System
+open System.ComponentModel.DataAnnotations
 open Microsoft.FSharp.Core
 
 module TelegramSettings =
@@ -8,7 +9,11 @@ module TelegramSettings =
   let SectionName = "Telegram"
 
   [<CLIMutable>]
-  type T = { Token: string; BotUrl: string }
+  type T =
+    { [<Required>]
+      Token: string
+      [<Required>]
+      BotUrl: string }
 
 module SpotifySettings =
   [<Literal>]
@@ -16,8 +21,11 @@ module SpotifySettings =
 
   [<CLIMutable>]
   type T =
-    { ClientId: string
+    { [<Required>]
+      ClientId: string
+      [<Required>]
       ClientSecret: string
+      [<Required>]
       CallbackUrl: Uri }
 
 module DatabaseSettings =
@@ -25,4 +33,6 @@ module DatabaseSettings =
   let SectionName = "Database"
 
   [<CLIMutable>]
-  type T = { ConnectionString: string }
+  type T =
+    { [<Required>]
+      ConnectionString: string }

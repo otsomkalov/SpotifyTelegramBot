@@ -3,6 +3,7 @@
 open System
 open System.Reflection
 open Bot.Data
+open Bot.Helpers
 open Bot.Services
 open Bot.Settings
 open Microsoft.Azure.Functions.Extensions.DependencyInjection
@@ -54,22 +55,20 @@ type Startup() =
   override this.Configure(builder: IFunctionsHostBuilder) : unit =
     let configuration =
       builder.GetContext().Configuration
+    let services = builder.Services
 
-    builder
-      .Services
-      .Configure<TelegramSettings.T>(configuration.GetSection(TelegramSettings.SectionName))
-      .Configure<SpotifySettings.T>(configuration.GetSection(SpotifySettings.SectionName))
-      .Configure<DatabaseSettings.T>(configuration.GetSection(DatabaseSettings.SectionName))
+    (services, configuration)
+    |> Startup.ConfigureAndValidate<TelegramSettings.T> TelegramSettings.SectionName
+    |> Startup.ConfigureAndValidate<SpotifySettings.T> SpotifySettings.SectionName
+    |> Startup.ConfigureAndValidate<DatabaseSettings.T> DatabaseSettings.SectionName
 
-    builder.Services.AddDbContext<AppDbContext>(configureDbContext)
+    services.AddDbContext<AppDbContext>(configureDbContext)
 
-    builder
-      .Services
+    services
       .AddSingleton<ITelegramBotClient>(configureTelegram)
       .AddSingleton<ISpotifyClient>(configureSpotify)
 
-    builder
-      .Services
+    services
       .AddSingleton<SpotifyRefreshTokenStore>()
       .AddSingleton<SpotifyClientStore>()
 

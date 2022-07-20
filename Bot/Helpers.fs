@@ -5,7 +5,6 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.FSharp.Core
 open SpotifyAPI.Web
-open Telegram.Bot.Types
 open Telegram.Bot.Types.Enums
 open Telegram.Bot.Types.InlineQueryResults
 

@@ -13,7 +13,6 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Options
 open SpotifyAPI.Web
-open Swan
 open Telegram.Bot
 
 #nowarn "20"
@@ -45,7 +44,7 @@ type Startup() =
   let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBuilder) =
     let settings =
       provider
-        .GetRequiredService<IOptions<Settings.DatabaseSettings.T>>()
+        .GetRequiredService<IOptions<Settings.Database.T>>()
         .Value
 
     builder.UseNpgsql(settings.ConnectionString)
@@ -62,7 +61,7 @@ type Startup() =
     (services, configuration)
     |> Startup.ConfigureAndValidate<Settings.Telegram.T> Settings.Telegram.SectionName
     |> Startup.ConfigureAndValidate<Settings.Spotify.T> Settings.Spotify.SectionName
-    |> Startup.ConfigureAndValidate<Settings.DatabaseSettings.T> Settings.DatabaseSettings.SectionName
+    |> Startup.ConfigureAndValidate<Settings.Database.T> Settings.Database.SectionName
 
     services.AddDbContext<AppDbContext>(configureDbContext)
 

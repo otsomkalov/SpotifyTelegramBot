@@ -29,7 +29,7 @@ module Spotify =
       [<Required>]
       CallbackUrl: Uri }
 
-module DatabaseSettings =
+module Database =
   [<Literal>]
   let SectionName = "Database"
 

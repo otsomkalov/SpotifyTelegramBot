@@ -20,9 +20,9 @@
     </resheader>
     <data name="AlbumContent" xml:space="preserve">
         <value>
-&lt;a href="{0}"&gt;{1}&lt;/a&gt;
-Artists: {2}
-Release date: {3}
+&lt;a href="{0}"&gt;{1}&lt;/a&gt; {2}
+Artists: {3}
+Release date: {4}
         </value>
     </data>
     <data name="ArtistContent" xml:space="preserve">
@@ -34,15 +34,15 @@ Release date: {3}
     <data name="PlaylistContent" xml:space="preserve">
         <value>
 &lt;a href="{0}"&gt;{1}&lt;/a&gt;
-Owner: {2}
+Owner: &lt;a href="{2}"&gt;{3}&lt;/a&gt;
         </value>
     </data>
     <data name="TrackContent" xml:space="preserve">
         <value>
-&lt;a href="{0}"&gt;{1}&lt;/a&gt;
-Artists: {2}
-Album: &lt;a href="{3}"&gt;{4}&lt;/a&gt;
-Duration: {5}
+&lt;a href="{0}"&gt;{1}&lt;/a&gt; {2}
+Artists: {3}
+Album: &lt;a href="{4}"&gt;{5}&lt;/a&gt;
+Duration: {6}
         </value>
     </data>
     <data name="AlbumDescription" xml:space="preserve">

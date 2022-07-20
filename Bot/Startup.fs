@@ -3,8 +3,10 @@
 open System
 open System.Reflection
 open Bot.Data
+open Bot.Helpers
 open Bot.Services
-open Bot.Settings
+open Bot.Services.Spotify
+open Bot.Services.Telegram
 open Microsoft.Azure.Functions.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.DependencyInjection
@@ -21,7 +23,7 @@ type Startup() =
   let configureTelegram (provider: IServiceProvider) =
     let settings =
       provider
-        .GetRequiredService<IOptions<TelegramSettings.T>>()
+        .GetRequiredService<IOptions<Settings.Telegram.T>>()
         .Value
 
     TelegramBotClient(settings.Token) :> ITelegramBotClient
@@ -29,7 +31,7 @@ type Startup() =
   let configureSpotify (provider: IServiceProvider) =
     let settings =
       provider
-        .GetRequiredService<IOptions<SpotifySettings.T>>()
+        .GetRequiredService<IOptions<Settings.Spotify.T>>()
         .Value
 
     let config =
@@ -42,7 +44,7 @@ type Startup() =
   let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBuilder) =
     let settings =
       provider
-        .GetRequiredService<IOptions<DatabaseSettings.T>>()
+        .GetRequiredService<IOptions<Settings.Database.T>>()
         .Value
 
     builder.UseNpgsql(settings.ConnectionString)
@@ -54,22 +56,20 @@ type Startup() =
   override this.Configure(builder: IFunctionsHostBuilder) : unit =
     let configuration =
       builder.GetContext().Configuration
+    let services = builder.Services
 
-    builder
-      .Services
-      .Configure<TelegramSettings.T>(configuration.GetSection(TelegramSettings.SectionName))
-      .Configure<SpotifySettings.T>(configuration.GetSection(SpotifySettings.SectionName))
-      .Configure<DatabaseSettings.T>(configuration.GetSection(DatabaseSettings.SectionName))
+    (services, configuration)
+    |> Startup.ConfigureAndValidate<Settings.Telegram.T> Settings.Telegram.SectionName
+    |> Startup.ConfigureAndValidate<Settings.Spotify.T> Settings.Spotify.SectionName
+    |> Startup.ConfigureAndValidate<Settings.Database.T> Settings.Database.SectionName
 
-    builder.Services.AddDbContext<AppDbContext>(configureDbContext)
+    services.AddDbContext<AppDbContext>(configureDbContext)
 
-    builder
-      .Services
+    services
       .AddSingleton<ITelegramBotClient>(configureTelegram)
       .AddSingleton<ISpotifyClient>(configureSpotify)
 
-    builder
-      .Services
+    services
       .AddSingleton<SpotifyRefreshTokenStore>()
       .AddSingleton<SpotifyClientStore>()
 

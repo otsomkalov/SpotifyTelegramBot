@@ -1,8 +1,10 @@
 ﻿namespace Bot.Functions
 
 open System.Threading.Tasks
+open Bot
 open Bot.Services
-open Bot.Settings
+open Bot.Services.Spotify
+open Bot.Services.Telegram
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc
 open Microsoft.Azure.WebJobs
@@ -28,7 +30,7 @@ type Telegram(_messageService: MessageService, _inlineQueryService: InlineQueryS
       | e -> logger.LogError(e, "Error during processing update:")
     }
 
-type Spotify(_spotifyService: SpotifyService, _telegramOptions: IOptions<TelegramSettings.T>) =
+type Spotify(_spotifyService: SpotifyService, _telegramOptions: IOptions<Settings.Telegram.T>) =
   let _telegramSettings = _telegramOptions.Value
 
   [<FunctionName("ProcessCallbackAsync")>]

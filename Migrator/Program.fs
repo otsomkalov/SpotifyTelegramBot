@@ -8,7 +8,7 @@ open Microsoft.Extensions.Options
 let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBuilder) =
   let settings =
     provider
-      .GetRequiredService<IOptions<DatabaseSettings.T>>()
+      .GetRequiredService<IOptions<Database.T>>()
       .Value
 
   builder.UseNpgsql(settings.ConnectionString) |> ignore
@@ -17,7 +17,7 @@ let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBu
 
 let builder = WebApplication.CreateBuilder()
 
-builder.Services.Configure<DatabaseSettings.T>(builder.Configuration.GetSection(DatabaseSettings.SectionName))
+builder.Services.Configure<Database.T>(builder.Configuration.GetSection(Database.SectionName))
 
 builder.Services.AddDbContext<AppDbContext>(configureDbContext) |> ignore
 

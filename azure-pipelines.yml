@@ -5,11 +5,16 @@ trigger:
   paths:
     exclude:
       - README.MD
-      - azure-pipelines.yml
       - '.github/*'
 
 pr:
-  - main
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - README.MD
+      - '.github/*'
 
 pool:
   vmImage: 'ubuntu-latest'

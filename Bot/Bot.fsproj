@@ -22,7 +22,8 @@
     <Compile Include="Migrations\20220709205736_Init.fs" />
     <Compile Include="Migrations\AppDbContextModelSnapshot.fs" />
     <Compile Include="Helpers.fs" />
-    <Compile Include="Services.fs" />
+    <Compile Include="Services\Spotify.fs" />
+    <Compile Include="Services\Telegram.fs" />
     <Compile Include="Functions.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>

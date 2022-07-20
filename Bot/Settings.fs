@@ -4,7 +4,8 @@ open System
 open System.ComponentModel.DataAnnotations
 open Microsoft.FSharp.Core
 
-module TelegramSettings =
+[<RequireQualifiedAccess>]
+module Telegram =
   [<Literal>]
   let SectionName = "Telegram"
 
@@ -15,7 +16,8 @@ module TelegramSettings =
       [<Required>]
       BotUrl: string }
 
-module SpotifySettings =
+[<RequireQualifiedAccess>]
+module Spotify =
   [<Literal>]
   let SectionName = "Spotify"
 

@@ -5,6 +5,8 @@ open System.Reflection
 open Bot.Data
 open Bot.Helpers
 open Bot.Services
+open Bot.Services.Spotify
+open Bot.Services.Telegram
 open Bot.Settings
 open Microsoft.Azure.Functions.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
@@ -22,7 +24,7 @@ type Startup() =
   let configureTelegram (provider: IServiceProvider) =
     let settings =
       provider
-        .GetRequiredService<IOptions<TelegramSettings.T>>()
+        .GetRequiredService<IOptions<Telegram.T>>()
         .Value
 
     TelegramBotClient(settings.Token) :> ITelegramBotClient
@@ -30,7 +32,7 @@ type Startup() =
   let configureSpotify (provider: IServiceProvider) =
     let settings =
       provider
-        .GetRequiredService<IOptions<SpotifySettings.T>>()
+        .GetRequiredService<IOptions<Spotify.T>>()
         .Value
 
     let config =
@@ -58,8 +60,8 @@ type Startup() =
     let services = builder.Services
 
     (services, configuration)
-    |> Startup.ConfigureAndValidate<TelegramSettings.T> TelegramSettings.SectionName
-    |> Startup.ConfigureAndValidate<SpotifySettings.T> SpotifySettings.SectionName
+    |> Startup.ConfigureAndValidate<Telegram.T> Telegram.SectionName
+    |> Startup.ConfigureAndValidate<Spotify.T> Spotify.SectionName
     |> Startup.ConfigureAndValidate<DatabaseSettings.T> DatabaseSettings.SectionName
 
     services.AddDbContext<AppDbContext>(configureDbContext)

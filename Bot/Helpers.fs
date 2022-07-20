@@ -22,6 +22,7 @@ module String =
     | _ -> None
 
 module Telegram =
+  [<RequireQualifiedAccess>]
   module InlineQueryResult =
     let private getThumbUrl (images: Image seq) =
       match images
@@ -128,9 +129,7 @@ module Telegram =
 
     let FromTrackFromAnonymousUser track = FromTrackForUser track false
 
-  module Shared =
-    let inline getUserId (item: ^a) = (^a: (member From: User) item).Id
-
+[<RequireQualifiedAccess>]
 module Startup =
   let ConfigureAndValidate<'T when 'T: not struct> section (services: IServiceCollection, configuration: IConfiguration) =
     services.AddOptions<'T>()

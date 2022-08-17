@@ -18,13 +18,13 @@ type Telegram(_messageService: MessageService, _inlineQueryService: InlineQueryS
   [<FunctionName("ProcessUpdateAsync")>]
   member this.ProcessUpdateAsync ([<HttpTrigger(AuthorizationLevel.Function, "POST", Route = "telegram/update")>] update: Update) (logger: ILogger) =
     task {
-      let processUpdateTask =
-        match update.Type with
-        | UpdateType.Message -> _messageService.ProcessAsync(update.Message)
-        | UpdateType.InlineQuery -> _inlineQueryService.ProcessAsync(update.InlineQuery)
-        | _ -> Task.FromResult()
-
       try
+        let processUpdateTask =
+          match update.Type with
+          | UpdateType.Message -> _messageService.ProcessAsync(update.Message)
+          | UpdateType.InlineQuery -> _inlineQueryService.ProcessAsync(update.InlineQuery)
+          | _ -> Task.FromResult()
+
         do! processUpdateTask
       with
       | e -> logger.LogError(e, "Error during processing update:")

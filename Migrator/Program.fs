@@ -1,6 +1,6 @@
 open System
+open Bot
 open Bot.Data
-open Bot.Settings
 open Microsoft.AspNetCore.Builder
 open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.DependencyInjection
@@ -8,7 +8,7 @@ open Microsoft.Extensions.Options
 let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBuilder) =
   let settings =
     provider
-      .GetRequiredService<IOptions<Database.T>>()
+      .GetRequiredService<IOptions<Settings.Database.T>>()
       .Value
 
   builder.UseNpgsql(settings.ConnectionString) |> ignore
@@ -17,7 +17,7 @@ let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBu
 
 let builder = WebApplication.CreateBuilder()
 
-builder.Services.Configure<Database.T>(builder.Configuration.GetSection(Database.SectionName))
+builder.Services.Configure<Settings.Database.T>(builder.Configuration.GetSection(Settings.Database.SectionName))
 
 builder.Services.AddDbContext<AppDbContext>(configureDbContext) |> ignore
 

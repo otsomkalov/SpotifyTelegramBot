@@ -12,6 +12,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Options
 open Telegram.Bot.Types
 open Telegram.Bot.Types.Enums
+open Microsoft.Azure.Functions.Worker.Http
 
 type Telegram(_messageService: MessageService, _inlineQueryService: InlineQueryService, logger: ILogger<Telegram>) =
   [<Function("ProcessUpdateAsync")>]

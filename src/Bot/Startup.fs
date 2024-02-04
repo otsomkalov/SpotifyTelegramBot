@@ -11,6 +11,8 @@ open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
+open Microsoft.Extensions.Logging
+open Microsoft.Extensions.Logging.ApplicationInsights
 open Microsoft.Extensions.Options
 open SpotifyAPI.Web
 open Telegram.Bot
@@ -81,6 +83,11 @@ let configureServices (builderContext: HostBuilderContext) (services: IServiceCo
 
   ()
 
+let private configureLogging (builder: ILoggingBuilder) =
+  builder.AddFilter<ApplicationInsightsLoggerProvider>(String.Empty, LogLevel.Information)
+
+  ()
+
 let configureAppConfiguration _ (configBuilder: IConfigurationBuilder) =
 
   configBuilder.AddUserSecrets(Assembly.GetExecutingAssembly(), true)
@@ -91,6 +98,7 @@ let host =
   HostBuilder()
     .ConfigureFunctionsWebApplication()
     .ConfigureAppConfiguration(configureAppConfiguration)
+    .ConfigureLogging(configureLogging)
     .ConfigureServices(configureServices)
     .Build()
 

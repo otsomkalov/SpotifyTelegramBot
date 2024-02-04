@@ -13,11 +13,10 @@ open Microsoft.Extensions.Options
 open Telegram.Bot.Types
 open Telegram.Bot.Types.Enums
 
-type Telegram(_messageService: MessageService, _inlineQueryService: InlineQueryService) =
+type Telegram(_messageService: MessageService, _inlineQueryService: InlineQueryService, logger: ILogger<Telegram>) =
   [<Function("ProcessUpdateAsync")>]
   member this.ProcessUpdateAsync
     ([<HttpTrigger(AuthorizationLevel.Function, "POST", Route = "telegram/update")>] request: HttpRequest, [<FromBody>] update: Update)
-    (logger: ILogger)
     =
     task {
       try

@@ -1,0 +1,21 @@
+﻿###
+GET https://api.telegram.org/bot{{token}}/logOut
+
+###
+GET https://api.telegram.org/bot{{token}}/getUpdates
+
+###
+GET https://api.telegram.org/bot{{token}}/deleteWebhook
+
+###
+GET https://api.telegram.org/bot{{token}}/getWebhookInfo
+
+###
+POST https://api.telegram.org/bot{{token}}/setWebhook
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="url"
+Content-Type: text/plain
+
+{{url}}/api/telegram/update

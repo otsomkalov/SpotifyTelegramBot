@@ -339,6 +339,8 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
+**/appsettings.Development.json
+
 # Local .terraform directories
 **/.terraform/*
 
@@ -379,3 +381,5 @@ terraform.rc
 **/.azurite
 
 **/*.private.env.json
+
+**/*.tfvars

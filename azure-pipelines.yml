@@ -41,7 +41,7 @@ steps:
       command: 'build'
       configuration: 'Release'
       projects: 'src/**/Bot.fsproj'
-      arguments: '-r $(Runtime) -c Release --no-self-contained'
+      arguments: '-r $(Runtime) -c Release'
       publishWebProjects: false
   - task: DotNetCoreCLI@2
     name: Publish
@@ -49,7 +49,7 @@ steps:
       command: 'publish'
       configuration: 'Release'
       projects: 'src/**/Bot.fsproj'
-      arguments: '-r $(Runtime) -c Release -p:PublishReadyToRun=true -o $(Build.ArtifactStagingDirectory)'
+      arguments: '-r $(Runtime) -c Release -o $(Build.ArtifactStagingDirectory)'
       publishWebProjects: false
   - task: PublishBuildArtifacts@1
     name: Pack

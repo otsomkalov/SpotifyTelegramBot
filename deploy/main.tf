@@ -75,7 +75,7 @@ resource "azurerm_linux_function_app" "func-spotify-telegram-bot" {
 
     application_stack {
       dotnet_version = "6.0"
-      use_dotnet_isolated_runtime = false
+      use_dotnet_isolated_runtime = true
     }
   }
 

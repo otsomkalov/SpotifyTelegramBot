@@ -23,17 +23,21 @@ variables:
   Runtime: 'linux-x64'
 
 steps:
+  - task: UseDotNet@2
+    inputs:
+      version: '6.x'
   - task: DotNetCoreCLI@2
     name: Restore
     inputs:
       command: 'restore'
+      projects: 'src/**/Bot.fsproj'
       arguments: '-r $(Runtime)'
   - task: DotNetCoreCLI@2
     name: Build
     inputs:
       command: 'build'
       configuration: 'Release'
-      projects: '**/Bot.fsproj'
+      projects: 'src/**/Bot.fsproj'
       arguments: '-r $(Runtime) -c Release --no-self-contained'
       publishWebProjects: false
   - task: DotNetCoreCLI@2
@@ -41,7 +45,7 @@ steps:
     inputs:
       command: 'publish'
       configuration: 'Release'
-      projects: '**/Bot.fsproj'
+      projects: 'src/**/Bot.fsproj'
       arguments: '-r $(Runtime) -c Release -p:PublishReadyToRun=true -o $(Build.ArtifactStagingDirectory)'
       publishWebProjects: false
   - task: PublishBuildArtifacts@1

@@ -7,16 +7,18 @@ open Bot.Services.Spotify
 open Bot.Services.Telegram
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc
-open Microsoft.Azure.WebJobs
-open Microsoft.Azure.WebJobs.Extensions.Http
+open Microsoft.Azure.Functions.Worker
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Options
 open Telegram.Bot.Types
 open Telegram.Bot.Types.Enums
 
 type Telegram(_messageService: MessageService, _inlineQueryService: InlineQueryService) =
-  [<FunctionName("ProcessUpdateAsync")>]
-  member this.ProcessUpdateAsync ([<HttpTrigger(AuthorizationLevel.Function, "POST", Route = "telegram/update")>] update: Update) (logger: ILogger) =
+  [<Function("ProcessUpdateAsync")>]
+  member this.ProcessUpdateAsync
+    ([<HttpTrigger(AuthorizationLevel.Function, "POST", Route = "telegram/update")>] request: HttpRequest, [<FromBody>] update: Update)
+    (logger: ILogger)
+    =
     task {
       try
         let processUpdateTask =
@@ -26,16 +28,19 @@ type Telegram(_messageService: MessageService, _inlineQueryService: InlineQueryS
           | _ -> Task.FromResult()
 
         do! processUpdateTask
-      with
-      | e -> logger.LogError(e, "Error during processing update:")
+      with e ->
+        logger.LogError(e, "Error during processing update:")
     }
 
 type Spotify(_spotifyService: SpotifyService, _telegramOptions: IOptions<Settings.Telegram.T>) =
   let _telegramSettings = _telegramOptions.Value
 
-  [<FunctionName("ProcessCallbackAsync")>]
-  member this.HandleCallbackAsync([<HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "spotify/callback")>] request: HttpRequest) (logger: ILogger) =
-    task{
+  [<Function("ProcessCallbackAsync")>]
+  member this.HandleCallbackAsync
+    ([<HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "spotify/callback")>] request: HttpRequest)
+    (logger: ILogger)
+    =
+    task {
       let code = request.Query["code"]
 
       let! spotifyId = _spotifyService.LoginAsync code

@@ -83,7 +83,7 @@ module Telegram =
         Description = String.Format(Resources.InlineQueryResult.ArtistDescription, getArtistGenres artist)
       )
 
-    let FromPlaylist (playlist: SimplePlaylist) =
+    let FromPlaylist (playlist: FullPlaylist) =
       let playlistMarkdown =
         String.Format(
           Resources.InlineQueryResult.PlaylistContent,

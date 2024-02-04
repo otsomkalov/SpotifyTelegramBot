@@ -38,7 +38,6 @@ type Spotify(_spotifyService: SpotifyService, _telegramOptions: IOptions<Setting
   [<Function("ProcessCallbackAsync")>]
   member this.HandleCallbackAsync
     ([<HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "spotify/callback")>] request: HttpRequest)
-    (logger: ILogger)
     =
     task {
       let code = request.Query["code"]

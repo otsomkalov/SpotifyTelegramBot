@@ -74,7 +74,7 @@ resource "azurerm_linux_function_app" "func-spotify-telegram-bot" {
     app_scale_limit = 10
 
     application_stack {
-      dotnet_version = "6.0"
+      dotnet_version = "8.0"
       use_dotnet_isolated_runtime = true
     }
   }

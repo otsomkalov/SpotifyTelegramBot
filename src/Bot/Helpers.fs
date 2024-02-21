@@ -1,8 +1,7 @@
 ﻿namespace Bot.Helpers
 
 open System
-open Microsoft.Extensions.Configuration
-open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Primitives
 open Microsoft.FSharp.Core
 open SpotifyAPI.Web
 open Telegram.Bot.Types.Enums
@@ -21,6 +20,11 @@ module String =
     | _ -> None
 
 module Telegram =
+  let (|CommandWithData|_|) (command: string) (input: string) =
+    match input.Split(" ") with
+    | [| inputCommand; data |] -> if inputCommand = command then Some(data) else None
+    | _ -> None
+
   [<RequireQualifiedAccess>]
   module InlineQueryResult =
     let private getThumbUrl (images: Image seq) =
@@ -129,12 +133,10 @@ module Telegram =
 
     let FromTrackFromAnonymousUser track = FromTrackForUser track false
 
-[<RequireQualifiedAccess>]
-module Startup =
-  let ConfigureAndValidate<'T when 'T: not struct> section (services: IServiceCollection, configuration: IConfiguration) =
-    services.AddOptions<'T>()
-      .Bind(configuration.GetSection(section))
-      .ValidateDataAnnotations()
-      |> ignore
+module IQueryCollection =
 
-    (services, configuration)
+  let (|QueryParam|_|) (stringValues: StringValues) =
+    if stringValues = StringValues.Empty then
+      None
+    else
+      Some(stringValues.ToString())

@@ -16,10 +16,13 @@ variable "spotify-client-secret" {
 
 variable "spotify-callback-url" {
   type = string
-  default = "<Spotify login callback url>"
 }
 
 variable "database-connection-string" {
+  type = string
+}
+
+variable "database-name" {
   type = string
 }
 

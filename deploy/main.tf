@@ -71,10 +71,10 @@ resource "azurerm_linux_function_app" "func-spotify-telegram-bot" {
 
   site_config {
     application_insights_key = azurerm_application_insights.appi-spotify-telegram-bot.instrumentation_key
-    app_scale_limit = 10
+    app_scale_limit          = 10
 
     application_stack {
-      dotnet_version = "6.0"
+      dotnet_version              = "8.0"
       use_dotnet_isolated_runtime = true
     }
   }
@@ -86,6 +86,7 @@ resource "azurerm_linux_function_app" "func-spotify-telegram-bot" {
     Spotify__ClientSecret      = var.spotify-client-secret
     Spotify__CallbackUrl       = var.spotify-callback-url
     Database__ConnectionString = var.database-connection-string
+    Database__Name             = var.database-name
   }
 
   tags = local.tags

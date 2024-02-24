@@ -2,21 +2,25 @@
 
 open System
 open System.Reflection
-open Bot.Data
 open Bot.Helpers
 open Bot.Services
 open Bot.Services.Spotify
 open Bot.Services.Telegram
-open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Logging.ApplicationInsights
 open Microsoft.Extensions.Options
+open MongoDB.ApplicationInsights
+open MongoDB.Driver
 open SpotifyAPI.Web
 open Telegram.Bot
 open Microsoft.Azure.Functions.Worker
+open otsom.fs.Telegram.Bot
+open otsom.fs.Extensions.DependencyInjection
+open otsom.fs.Telegram.Bot.Auth.Spotify.Settings
+open MongoDB.ApplicationInsights.DependencyInjection
 
 #nowarn "20"
 
@@ -28,11 +32,8 @@ let configureTelegram (provider: IServiceProvider) =
 
   TelegramBotClient(settings.Token) :> ITelegramBotClient
 
-let configureSpotify (provider: IServiceProvider) =
-  let settings =
-    provider
-      .GetRequiredService<IOptions<Settings.Spotify.T>>()
-      .Value
+let configureDefaultSpotifyClient (options: IOptions<SpotifySettings>) =
+  let settings = options.Value
 
   let config =
     SpotifyClientConfig
@@ -41,17 +42,15 @@ let configureSpotify (provider: IServiceProvider) =
 
   SpotifyClient(config) :> ISpotifyClient
 
-let configureDbContext (provider: IServiceProvider) (builder: DbContextOptionsBuilder) =
-  let settings =
-    provider
-      .GetRequiredService<IOptions<Settings.Database.T>>()
-      .Value
+let private configureMongoClient (factory: IMongoClientFactory) (options: IOptions<Settings.DatabaseSettings>) =
+  let settings = options.Value
 
-  builder.UseNpgsql(settings.ConnectionString)
+  factory.GetClient(settings.ConnectionString)
 
-  builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+let private configureMongoDatabase (options: IOptions<Settings.DatabaseSettings>) (mongoClient: IMongoClient) =
+  let settings = options.Value
 
-  ()
+  mongoClient.GetDatabase(settings.Name)
 
 let configureServices (builderContext: HostBuilderContext) (services: IServiceCollection) : unit =
   let configuration = builderContext.Configuration
@@ -59,25 +58,28 @@ let configureServices (builderContext: HostBuilderContext) (services: IServiceCo
   services.AddApplicationInsightsTelemetryWorkerService()
   services.ConfigureFunctionsApplicationInsights();
 
-  (services, configuration)
-  |> Startup.ConfigureAndValidate<Settings.Telegram.T> Settings.Telegram.SectionName
-  |> Startup.ConfigureAndValidate<Settings.Spotify.T> Settings.Spotify.SectionName
-  |> Startup.ConfigureAndValidate<Settings.Database.T> Settings.Database.SectionName
+  services.Configure<Settings.Telegram.T>(configuration.GetSection(Settings.Telegram.SectionName))
+  services.Configure<Settings.DatabaseSettings>(configuration.GetSection(Settings.DatabaseSettings.SectionName))
 
-  services.AddDbContext<AppDbContext>(configureDbContext)
+  services.AddMongoClientFactory()
+  services.BuildSingleton<IMongoClient, IMongoClientFactory, IOptions<Settings.DatabaseSettings>>(configureMongoClient)
+  services.BuildSingleton<IMongoDatabase, IOptions<Settings.DatabaseSettings>, IMongoClient>(configureMongoDatabase)
 
   services
     .AddSingleton<ITelegramBotClient>(configureTelegram)
-    .AddSingleton<ISpotifyClient>(configureSpotify)
+    .BuildSingleton<ISpotifyClient, IOptions<SpotifySettings>>(configureDefaultSpotifyClient)
 
   services
     .AddSingleton<SpotifyRefreshTokenStore>()
     .AddSingleton<SpotifyClientStore>()
 
     .AddScoped<SpotifyClientProvider>()
-    .AddScoped<SpotifyService>()
     .AddScoped<MessageService>()
     .AddScoped<InlineQueryService>()
+
+  services
+  |> Auth.Spotify.Startup.addSpotifyAuth configuration
+  |> Auth.Spotify.Mongo.Startup.addMongoSpotifyAuth
 
   services.AddMvcCore().AddNewtonsoftJson()
 

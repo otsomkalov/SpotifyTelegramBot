@@ -1,14 +1,13 @@
 module Bot.Services.Spotify
 
-open Bot
-open Bot.Data
 open System
 open System.Collections.Generic
 open Microsoft.Extensions.Options
 open System.Threading.Tasks
 open SpotifyAPI.Web
-open EntityFrameworkCore.FSharp.DbContextHelpers
-open System.Linq
+open otsom.fs.Telegram.Bot.Auth.Spotify.Settings
+open otsom.fs.Telegram.Bot.Auth.Spotify.Workflows
+open otsom.fs.Telegram.Bot.Core
 
 type SpotifyRefreshTokenStore() =
   let tokens = Dictionary<string, string>()
@@ -36,91 +35,51 @@ type SpotifyClientStore() =
     | false -> None
 
 
-type SpotifyClientProvider(_context: AppDbContext, _spotifyClientStore: SpotifyClientStore, _spotifyOptions: IOptions<Settings.Spotify.T>) =
-  let _spotifySettings = _spotifyOptions.Value
+type SpotifyClientProvider(loadCompletedAuth: Completed.Load, _spotifyOptions: IOptions<SpotifySettings>) =
+  let settings = _spotifyOptions.Value
+  let createClientFromTokenResponse =
+    fun response ->
+      let authenticator =
+        AuthorizationCodeAuthenticator(settings.ClientId, settings.ClientSecret, response)
 
-  let createClient refreshToken =
-    let tokenResponse =
-      AuthorizationCodeTokenResponse(CreatedAt = DateTime.UtcNow.AddSeconds(-86400), RefreshToken = refreshToken)
+      let retryHandler =
+        SimpleRetryHandler(RetryAfter = TimeSpan.FromSeconds(30), RetryTimes = 3, TooManyRequestsConsumesARetry = true)
 
-    let spotifyClientConfig =
-      AuthorizationCodeAuthenticator(_spotifySettings.ClientId, _spotifySettings.ClientSecret, tokenResponse)
-      |> SpotifyClientConfig
-        .CreateDefault()
-        .WithAuthenticator
-
-    SpotifyClient(spotifyClientConfig) :> ISpotifyClient
-
-  let createClientAsync' telegramId =
-    task {
-      let! spotifyRefreshToken =
-        _context
-          .Users
-          .Where(fun u -> u.Id = telegramId)
-          .Select(fun u -> u.SpotifyRefreshToken)
-          .TryFirstTaskAsync()
-
-      return
-        match spotifyRefreshToken with
-        | Some token -> Some(createClient token)
-        | None -> None
-    }
-
-  let createClientAsync telegramId =
-    task {
-      let! client = createClientAsync' telegramId
-
-      return
-        match client with
-        | Some c ->
-          _spotifyClientStore.AddClient telegramId c
-          Some c
-        | None -> None
-    }
-
-  member this.GetClientAsync telegramId =
-    match _spotifyClientStore.GetClient telegramId with
-    | Some client -> Task.FromResult(Some client)
-    | None -> createClientAsync telegramId
-
-
-type SpotifyService
-  (
-    _spotifyOptions: IOptions<Settings.Spotify.T>,
-    _context: AppDbContext,
-    _spotifyRefreshTokenStore: SpotifyRefreshTokenStore
-  ) =
-  let _spotifySettings = _spotifyOptions.Value
-
-  member this.GetLoginUrl() =
-    let scopes =
-      [ Scopes.UserReadRecentlyPlayed
-        Scopes.UserLibraryRead ]
-      |> List<string>
-
-    let loginRequest =
-      LoginRequest(_spotifySettings.CallbackUrl, _spotifySettings.ClientId, LoginRequest.ResponseType.Code, Scope = scopes)
-
-    loginRequest.ToUri().ToString()
-
-  member this.LoginAsync code =
-    task {
-      let! tokenResponse =
-        (_spotifySettings.ClientId, _spotifySettings.ClientSecret, code, _spotifySettings.CallbackUrl)
-        |> AuthorizationCodeTokenRequest
-        |> OAuthClient().RequestToken
-
-      let spotifyClient =
-        (_spotifySettings.ClientId, _spotifySettings.ClientSecret, tokenResponse)
-        |> AuthorizationCodeAuthenticator
-        |> SpotifyClientConfig
+      let config =
+        SpotifyClientConfig
           .CreateDefault()
-          .WithAuthenticator
-        |> SpotifyClient
+          .WithAuthenticator(authenticator)
+          .WithRetryHandler(retryHandler)
 
-      let! spotifyUserProfile = spotifyClient.UserProfile.Current()
+      config |> SpotifyClient :> ISpotifyClient
 
-      _spotifyRefreshTokenStore.AddToken spotifyUserProfile.Id tokenResponse.RefreshToken
+  let _clientsByTelegramId =
+    Dictionary<int64, ISpotifyClient>()
 
-      return spotifyUserProfile.Id
-    }
+  member this.GetAsync userId : Task<ISpotifyClient option> =
+    let userId' = userId |> UserId.value
+
+    if _clientsByTelegramId.ContainsKey(userId') then
+      _clientsByTelegramId[userId'] |> Some |> Task.FromResult
+    else
+      task {
+        let! auth = loadCompletedAuth userId
+
+        return!
+          match auth with
+          | None -> Task.FromResult None
+          | Some auth ->
+            let client =
+              AuthorizationCodeTokenResponse(RefreshToken = auth.Token)
+              |> createClientFromTokenResponse
+
+            this.SetClient(userId', client)
+
+            client |> Some |> Task.FromResult
+      }
+
+  member this.SetClient(telegramId: int64, client: ISpotifyClient) =
+    if _clientsByTelegramId.ContainsKey(telegramId) then
+      ()
+    else
+      (telegramId, client) |> _clientsByTelegramId.Add

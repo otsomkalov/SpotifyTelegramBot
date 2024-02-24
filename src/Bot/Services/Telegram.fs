@@ -1,7 +1,7 @@
 module Bot.Services.Telegram
 
-open Bot.Data
 open Bot.Services.Spotify
+open Microsoft.Extensions.Options
 open Resources
 open System
 open System.Collections.Generic
@@ -11,20 +11,47 @@ open Telegram.Bot
 open Telegram.Bot.Types
 open Bot.Helpers
 open Bot.Helpers.String
+open Telegram.Bot.Types.Enums
 open Telegram.Bot.Types.InlineQueryResults
 open Telegram.Bot.Types.ReplyMarkups
-open EntityFrameworkCore.FSharp.DbContextHelpers
+open otsom.fs.Extensions
+open otsom.fs.Telegram.Bot.Auth.Spotify
+open otsom.fs.Telegram.Bot.Auth.Spotify.Settings
+open otsom.fs.Telegram.Bot.Core
+
+type SendMessage = string -> Task<unit>
+type ReplyToMessage = string -> Task<unit>
+
+let sendMessage (bot: ITelegramBotClient) userId : SendMessage =
+  fun text ->
+    bot.SendTextMessageAsync((userId |> UserId.value |> ChatId), text, parseMode = ParseMode.MarkdownV2)
+    |> Task.map ignore
+
+let replyToMessage (bot: ITelegramBotClient) userId (messageId: int) : ReplyToMessage =
+  fun text ->
+    bot.SendTextMessageAsync(
+      (userId |> UserId.value |> ChatId),
+      text,
+      parseMode = ParseMode.MarkdownV2,
+      replyToMessageId = messageId
+    )
+    |> Task.map ignore
 
 type MessageService
   (
     _bot: ITelegramBotClient,
-    _spotifyService: SpotifyService,
     _spotifyClientStore: SpotifyClientStore,
     _spotifyRefreshTokenStore: SpotifyRefreshTokenStore,
-    _context: AppDbContext
+    initAuth: Auth.Init,
+    completeAuth: Auth.Complete,
+    _spotifyOptions: IOptions<SpotifySettings>
   ) =
+  let spotifySettings = _spotifyOptions.Value
+
   let processEmptyStartCommandAsync (message: Message) =
     task {
+      let! loginLink = initAuth (message.From.Id |> UserId) [ Scopes.UserReadRecentlyPlayed; Scopes.UserLibraryRead ]
+
       let markup =
         seq {
           seq {
@@ -32,7 +59,7 @@ type MessageService
             InlineKeyboardButton.WithSwitchInlineQuery(Message.Share)
           }
 
-          seq { InlineKeyboardButton.WithUrl("Login", _spotifyService.GetLoginUrl()) }
+          seq { InlineKeyboardButton.WithUrl("Login", loginLink) }
         }
         |> InlineKeyboardMarkup
 
@@ -41,48 +68,25 @@ type MessageService
       return ()
     }
 
-  let createUserAsync telegramId spotifyId refreshToken =
-    task {
-      let user =
-        { Id = telegramId
-          SpotifyId = spotifyId
-          SpotifyRefreshToken = refreshToken }
 
-      let! _ = _context.Users.AddAsync user
-      let! _ = _context.SaveChangesAsync()
+  let processStartCommandDataAsync state (message: Message) =
+    let userId = message.From.Id |> UserId
 
-      ()
-    }
+    let processSuccessfulLogin =
+      fun () ->
+        _bot.SendTextMessageAsync(ChatId(message.From.Id), "You've successfully logged in!") |> Task.map ignore
 
-  let updateUserAsync user refreshToken =
-    task {
-      let updatedUser =
-        { user with SpotifyRefreshToken = refreshToken }
+    let sendErrorMessage =
+      function
+      | Auth.CompleteError.StateNotFound ->
+        _bot.SendTextMessageAsync(ChatId(message.From.Id), "State not found. Try to login via fresh link.", replyToMessageId = message.MessageId)
+        |> Task.map ignore
+      | Auth.CompleteError.StateDoesntBelongToUser ->
+        _bot.SendTextMessageAsync(ChatId(message.From.Id), "State provided does not belong to your login request. Try to login via fresh link.", replyToMessageId = message.MessageId)
+        |> Task.map ignore
 
-      _context.Users.Update(updatedUser) |> ignore
-      let! _ = _context.SaveChangesAsync()
-
-      ()
-    }
-
-  let processStartCommandDataAsync spotifyId (message: Message) =
-    task {
-      let refreshToken =
-        _spotifyRefreshTokenStore.GetToken spotifyId
-
-      let! user = _context.Users.TryFirstTaskAsync(fun u -> u.Id = message.From.Id)
-
-      let processUserFunc =
-        match user with
-        | Some u -> updateUserAsync u
-        | None -> createUserAsync message.From.Id spotifyId
-
-      do! processUserFunc refreshToken
-
-      let! _ = _bot.SendTextMessageAsync(ChatId(message.Chat.Id), "You've successfully logged in!")
-
-      ()
-    }
+    completeAuth userId state
+    |> TaskResult.taskEither processSuccessfulLogin sendErrorMessage
 
   let processStartCommandAsync (message: Message) =
     let processMessageFunc =
@@ -200,7 +204,9 @@ type InlineQueryService(_bot: ITelegramBotClient, _spotifyClientProvider: Spotif
 
   member this.ProcessAsync(inlineQuery: InlineQuery) =
     task {
-      let! userSpotifyClient = _spotifyClientProvider.GetClientAsync inlineQuery.From.Id
+      let userId = inlineQuery.From.Id |> UserId
+
+      let! userSpotifyClient = _spotifyClientProvider.GetAsync userId
 
       let! results =
         match userSpotifyClient, String.IsNullOrEmpty inlineQuery.Query with

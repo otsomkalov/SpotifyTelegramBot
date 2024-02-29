@@ -78,7 +78,8 @@ let configureServices (builderContext: HostBuilderContext) (services: IServiceCo
     .AddScoped<InlineQueryService>()
 
   services
-  |> Auth.Spotify.Startup.addSpotifyAuth configuration
+  |> Startup.addTelegramBotCore
+  |> Auth.Spotify.Startup.addTelegramBotSpotifyAuthCore configuration
   |> Auth.Spotify.Mongo.Startup.addMongoSpotifyAuth
 
   services.AddMvcCore().AddNewtonsoftJson()

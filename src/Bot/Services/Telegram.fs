@@ -18,6 +18,7 @@ open otsom.fs.Extensions
 open otsom.fs.Telegram.Bot.Auth.Spotify
 open otsom.fs.Telegram.Bot.Auth.Spotify.Settings
 open otsom.fs.Telegram.Bot.Core
+open otsom.fs.Extensions.String
 
 type SendMessage = string -> Task<unit>
 type ReplyToMessage = string -> Task<unit>
@@ -44,74 +45,62 @@ type MessageService
     _spotifyRefreshTokenStore: SpotifyRefreshTokenStore,
     initAuth: Auth.Init,
     completeAuth: Auth.Complete,
-    _spotifyOptions: IOptions<SpotifySettings>
+    sendUserMessage: SendUserMessage,
+    replyToUserMessage: ReplyToUserMessage,
+    sendUserMessageButtons: SendUserMessageButtons
   ) =
-  let spotifySettings = _spotifyOptions.Value
+  let sendWelcomeMessage (sendMessageButtons: SendMessageButtons) =
+    fun userId ->
+      task {
+        let! loginLink = initAuth userId [ Scopes.UserReadRecentlyPlayed; Scopes.UserLibraryRead ]
 
-  let processEmptyStartCommandAsync (message: Message) =
-    task {
-      let! loginLink = initAuth (message.From.Id |> UserId) [ Scopes.UserReadRecentlyPlayed; Scopes.UserLibraryRead ]
-
-      let markup =
-        seq {
+        let buttons =
           seq {
-            InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(Message.Search)
-            InlineKeyboardButton.WithSwitchInlineQuery(Message.Share)
+            seq {
+              InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(Message.Search)
+              InlineKeyboardButton.WithSwitchInlineQuery(Message.Share)
+            }
+
+            seq { InlineKeyboardButton.WithUrl("Login", loginLink) }
           }
+          |> InlineKeyboardMarkup
 
-          seq { InlineKeyboardButton.WithUrl("Login", loginLink) }
-        }
-        |> InlineKeyboardMarkup
+        let! _ = sendMessageButtons Message.Welcome buttons
 
-      let! _ = _bot.SendTextMessageAsync(ChatId(message.From.Id), Message.Welcome, replyMarkup = markup)
+        return ()
+      }
 
-      return ()
-    }
+  let processLogin (sendMessage: SendMessage) (replyToMessage: ReplyToMessage) =
+    fun userId state ->
+      let processSuccessfulLogin =
+        fun ()-> sendMessage "You've successfully logged in!"
 
+      let sendErrorMessage =
+        function
+        | Auth.CompleteError.StateNotFound ->
+          replyToMessage "State not found. Try to login via fresh link."
+          |> Task.map ignore
+        | Auth.CompleteError.StateDoesntBelongToUser ->
+          replyToMessage "State provided does not belong to your login request. Try to login via fresh link."
+          |> Task.map ignore
 
-  let processStartCommandDataAsync state (message: Message) =
-    let userId = message.From.Id |> UserId
-
-    let processSuccessfulLogin =
-      fun () ->
-        _bot.SendTextMessageAsync(ChatId(message.From.Id), "You've successfully logged in!") |> Task.map ignore
-
-    let sendErrorMessage =
-      function
-      | Auth.CompleteError.StateNotFound ->
-        _bot.SendTextMessageAsync(ChatId(message.From.Id), "State not found. Try to login via fresh link.", replyToMessageId = message.MessageId)
-        |> Task.map ignore
-      | Auth.CompleteError.StateDoesntBelongToUser ->
-        _bot.SendTextMessageAsync(ChatId(message.From.Id), "State provided does not belong to your login request. Try to login via fresh link.", replyToMessageId = message.MessageId)
-        |> Task.map ignore
-
-    completeAuth userId state
-    |> TaskResult.taskEither processSuccessfulLogin sendErrorMessage
-
-  let processStartCommandAsync (message: Message) =
-    let processMessageFunc =
-      match message.Text with
-      | CommandData data -> processStartCommandDataAsync data
-      | _ -> processEmptyStartCommandAsync
-
-    processMessageFunc message
-
-  let processUnknownCommandAsync (message: Message) =
-    task {
-      let! _ = _bot.SendTextMessageAsync(ChatId(message.From.Id), "Unsupported command")
-
-      return ()
-    }
+      completeAuth userId state
+      |> TaskResult.taskEither processSuccessfulLogin sendErrorMessage
 
   member this.ProcessAsync(message: Message) =
-    task {
-      let processMessageFunc =
-        match message.Text with
-        | StartsWith "/start" -> processStartCommandAsync
-        | _ -> processUnknownCommandAsync
+    let userId = message.From.Id |> UserId
+    let sendMessage = sendUserMessage userId
+    let replyToMessage = replyToUserMessage userId message.MessageId
+    let sendMessageButtons = sendUserMessageButtons userId
+    let processLogin = processLogin sendMessage replyToMessage
 
-      return! processMessageFunc message
-    }
+    match message.Text with
+    | StartsWith "/start" ->
+      match message.Text with
+      | CommandData state -> processLogin userId state
+      | _ -> sendWelcomeMessage sendMessageButtons userId
+    | _ ->
+      sendMessage "Unsupported command"
 
 type InlineQueryService(_bot: ITelegramBotClient, _spotifyClientProvider: SpotifyClientProvider, _appSpotifyClient: ISpotifyClient) =
   let processAnonymousInlineQueryAsync (inlineQuery: InlineQuery) =

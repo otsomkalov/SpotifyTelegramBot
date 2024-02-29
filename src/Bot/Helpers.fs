@@ -8,11 +8,6 @@ open Telegram.Bot.Types.Enums
 open Telegram.Bot.Types.InlineQueryResults
 
 module String =
-  let (|StartsWith|_|) (prefix: string) (str: string) =
-    if str.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase) then
-      Some()
-    else
-      None
 
   let (|CommandData|_|) (str: string) =
     match str.Split(" ") with
@@ -69,7 +64,7 @@ module Telegram =
         album.Id,
         [ album.Name; likeSymbol ] |> String.concat " ",
         InputTextMessageContent(albumMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl album.Images,
+        ThumbnailUrl = getThumbUrl album.Images,
         Description = String.Format(Resources.InlineQueryResult.AlbumDescription, joinArtistsNames album.Artists)
       )
 
@@ -83,7 +78,7 @@ module Telegram =
         artist.Id,
         artist.Name,
         InputTextMessageContent(artistMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl artist.Images,
+        ThumbnailUrl = getThumbUrl artist.Images,
         Description = String.Format(Resources.InlineQueryResult.ArtistDescription, getArtistGenres artist)
       )
 
@@ -101,7 +96,7 @@ module Telegram =
         playlist.Id,
         playlist.Name,
         InputTextMessageContent(playlistMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl playlist.Images,
+        ThumbnailUrl = getThumbUrl playlist.Images,
         Description = String.Format(Resources.InlineQueryResult.PlaylistDescription, playlist.Owner.DisplayName)
       )
 
@@ -127,7 +122,7 @@ module Telegram =
         track.Id,
         [ track.Name; likeSymbol ] |> String.concat " ",
         InputTextMessageContent(trackMarkdown, ParseMode = ParseMode.Html),
-        ThumbUrl = getThumbUrl track.Album.Images,
+        ThumbnailUrl = getThumbUrl track.Album.Images,
         Description = String.Format(Resources.InlineQueryResult.TrackDescription, joinArtistsNames track.Artists)
       )
 
